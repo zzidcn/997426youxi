@@ -67,18 +67,18 @@ function theme997426_game_links() {
 $site_top = function_exists( 'theme997426_site_top' ) ? theme997426_site_top( 10 ) : array();
 $hub_url  = get_permalink( get_page_by_path( 'games-hub', OBJECT, array( 'page' ) ) );
 ?>
-<div class="g99-container">
+<div class="g99-container g99-home">
 	<section class="g99-hero">
 		<h1>🎮 997426小游戏</h1>
 		<p>即点即玩 · 电脑手机全支持 · 全站积分排行</p>
 		<?php if ( $hub_url ) : ?>
-			<p style="margin-top:14px;">
+			<p class="g99-hero-actions">
 				<a class="g99-hero-btn" href="<?php echo esc_url( $hub_url ); ?>">🎮 进入游戏大厅</a>
 			</p>
 		<?php endif; ?>
 	</section>
 
-	<section>
+	<section class="g99-home-section">
 		<h2 class="g99-section-title">🏆 全站积分排行 TOP10</h2>
 		<?php if ( ! empty( $site_top ) ) : ?>
 			<ol class="g99-lb-list g99-site-lb g99-rank-table">
@@ -93,15 +93,15 @@ $hub_url  = get_permalink( get_page_by_path( 'games-hub', OBJECT, array( 'page' 
 					</li>
 				<?php endforeach; ?>
 			</ol>
-			<p class="g99-muted" style="font-size:.8rem;margin-top:8px;">积分 = 各游戏个人最高分 ÷ 100 的总和</p>
+			<p class="g99-muted g99-rule-note">积分 = 各游戏个人最高分 ÷ 100 的总和</p>
 		<?php else : ?>
 			<p class="g99-muted">暂无积分记录——进入任意游戏玩一局即可上榜！</p>
 		<?php endif; ?>
 	</section>
 
-	<section>
+	<section class="g99-home-section">
 		<h2 class="g99-section-title">🎯 挑战记录 · 选择一款游戏开战</h2>
-		<div class="g99-grid">
+		<div class="g99-grid g99-challenge-grid">
 			<?php
 			$games = function_exists( 'theme997426_game_links' ) ? theme997426_game_links() : array();
 			if ( empty( $games ) ) {
