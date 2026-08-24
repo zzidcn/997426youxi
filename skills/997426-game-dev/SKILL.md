@@ -49,7 +49,11 @@ metadata:
    ```
 3. **自适应**：Canvas 类监听 resize 按 `clientWidth × devicePixelRatio` 重设物理像素；DOM 类用 `min(96vw, 96vh - HUD)` + `aspect-ratio`。禁止横向滚动条、禁止固定窗口尺寸假设。
 4. **双输入**：键盘（方向键/WASD + 空格开始）和触屏（滑动/点按；容器 `touch-action:none`，touchmove 里 `preventDefault()` 防滚动）。开始界面写明两种操作方式。
-4b. **界面四要素（v2 强制）**：①开始游戏遮罩+「▶开始」按钮 ②⏹结束游戏按钮(游戏中显示,主动结算上报)+结算画面 ③HUD常驻⛶全屏按钮 ④❓介绍弹窗。参考 `games/snake/` v2 实现。
+4b. **界面四要素（v2 强制）**：①开始游戏遮罩+「▶开始」按钮 ②⏹结束游戏按钮(游戏中显示,主动结算上报)+结算画面 ③HUD常驻⛶全屏按钮 ④❓介绍弹窗。参考 `plugins-single/997426-game-snake/`。
+4c. **CSS 隔离**：所有游戏规则必须限定在游戏根类下（如 `.g2048-grid .tN`），裸类名（`.tile`、`.t2`）会被主题全局样式覆盖——曾致 2048 格子颜色失效。关键配色加 !important。
+4d. **音效标准**：引入共享 `assets/sfx.js`（GameSFX，Web Audio 合成零文件），HUD 加 🔊 开关；挂接 eat/move/click/over 事件；首次交互自动 init（浏览器自动播放策略）。
+4e. **全屏竖屏适配**：根类 `:fullscreen` 占满 100dvh + safe-area-inset；舞台 `min(96vw, 92vh-70px)` 方形居中；canvas 监听 fullscreenchange/orientationchange 重算。
+4f. **榜单同步提示**：排行榜标题旁注明「成绩约 1 分钟内同步」（60s transient 缓存）。
 4c. **SDK 兜底路径**（线上"离线模式"最常见原因）：SDK 动态注入候选路径依次为 `/wp-content/plugins/...` → `/plugins/...` → `../../plugins/...`，Rocket Loader 环境必须用此兜底。
 5. **SDK 接入**（游戏结束时调用，一局仅一次）：
    ```js
