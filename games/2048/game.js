@@ -215,10 +215,6 @@
     var el = document.getElementById('loginStatus');
     if (!el) return;
     function render() {
-      if (!window.Game997426) {
-        el.innerHTML = '⚠️ 无法连接平台（离线模式），成绩不会上报';
-        return;
-      }
       window.Game997426.getMe().then(function (me) {
         if (me && me.logged_in) {
           el.textContent = '👤 当前玩家：' + me.name + '　💎 ' + Number(me.points).toLocaleString() + ' 积分';
@@ -230,11 +226,19 @@
         el.textContent = '(离线模式，成绩不会上报)';
       });
     }
-    var tries = 0;
+    // 等待 SDK 初始化完成（最多 10s），超时则报离线。
+    var waited = 0;
     var timer = setInterval(function () {
-      tries++;
-      if (window.Game997426 || tries > 20) { clearInterval(timer); }
-      if (window.Game997426 && window.Game997426._cfg) { clearInterval(timer); render(); }
-    }, 300);
+      waited += 400;
+      if (window.Game997426 && window.Game997426.ready) {
+        clearInterval(timer);
+        window.Game997426.ready().then(render).catch(function () {
+          el.textContent = '(离线模式，成绩不会上报)';
+        });
+      } else if (waited >= 10000) {
+        clearInterval(timer);
+        el.innerHTML = '⚠️ 无法连接平台（离线模式），成绩不会上报';
+      }
+    }, 400);
   })();
 })();
