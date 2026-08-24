@@ -82,3 +82,12 @@ metadata:
 - push 前 `export https_proxy=http://127.0.0.1:10808`；
 - gh CLI 路径 `%LOCALAPPDATA%/Temp/ghtool/bin/gh.exe`；
 - GitHub 仓库名不支持中文。
+
+## 发版检查清单（每次 release 必做）
+
+版本号需同步更新 **5 处**，缺一会被 WordPress/浏览器误判为旧版：
+1. 插件主文件头 `Version:`（WP 识别插件版本的唯一依据）
+2. `GAME997426_VERSION` 常量
+3. 主题 style.css 头 `Version:`（WP 识别主题版本的唯一依据）
+4. functions.php 头注释 Version + wp_enqueue 资源版本号（缓存刷新）
+5. 打包后 grep 确认 dist 内无旧版本号残留

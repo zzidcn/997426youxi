@@ -3,7 +3,7 @@
  * Plugin Name: 997426 游戏核心 (Game Core)
  * Plugin URI:  https://github.com/zzidcn/997426youxi
  * Description: 997426小游戏平台底座 —— 游戏自定义文章类型(CPT)、统一游戏排行榜、全站积分荣誉系统、游戏数据上报 REST API。
- * Version:     1.2.5
+ * Version:     1.3.0
  * Author:      997426
  * License:     GPL-2.0-or-later
  * Requires at least: 6.0
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GAME997426_VERSION', '1.2.5' );
+define( 'GAME997426_VERSION', '1.3.0' );
 /**
  * 数据库 schema 版本：结构变更时递增，激活/升级时自动迁移。
  * v2: scores 表新增 ip_hash 列（游客按 IP 聚合）。
