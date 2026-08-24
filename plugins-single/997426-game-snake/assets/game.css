@@ -91,3 +91,23 @@
 li:first-child .gsnake-lb-rank { background: #ffd166; color: #000; }
 li:nth-child(2) .gsnake-lb-rank { background: #c0c0c0; color: #000; }
 li:nth-child(3) .gsnake-lb-rank { background: #cd7f32; color: #000; }
+
+/* 手机虚拟方向键：仅触屏设备显示 */
+.gsnake-dpad {
+  display: none;
+  grid-template-columns: repeat(3, 64px);
+  grid-auto-rows: 56px; gap: 8px;
+  justify-content: center; margin-top: 14px;
+}
+@media (hover: none) and (pointer: coarse) {
+  .gsnake-dpad { display: grid; }
+}
+.gsnake:fullscreen .gsnake-dpad { margin-top: auto; padding-bottom: env(safe-area-inset-bottom); }
+.gsnake-dbtn {
+  border-radius: 12px; cursor: pointer; touch-action: manipulation;
+  background: #1d2242; border: 1px solid #2c3370; color: #e8eaf6;
+  font-size: 1.2rem; display: grid; place-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.gsnake-dbtn:active { background: var(--gsn-accent, #7c5cff); transform: scale(.94); }
+.gsnake-dmid { background: transparent; border-color: transparent; }

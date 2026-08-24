@@ -2,7 +2,7 @@
 /**
  * Plugin Name: 997426 游戏 - 贪吃蛇
  * Description: 贪吃蛇小游戏独立插件。启用后自动创建并发布游戏页面，无需手写短代码。每款游戏独立数据表与排行榜。
- * Version:     1.3.0
+ * Version:     1.4.0
  * Author:      997426
  * License:     GPL-2.0-or-later
  * Requires at least: 6.0
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GAME_SNAKE_VER', '1.3.0' );
+define( 'GAME_SNAKE_VER', '1.4.0' );
 
 /* 页面 slug 与标题（自动建页用） */
 define( 'GAME_SNAKE_PAGE_SLUG', 'game-snake' );
@@ -199,7 +199,7 @@ function game_snake_shortcode( $atts ) {
 				<div>
 					<p class="gsnake-intro">
 						吃果实变长变快，撞墙或撞到自己即结束。<br>
-						💻 方向键 / WASD　📱 滑动屏幕
+						💻 方向键 / WASD　📱 滑动屏幕或方向键
 					</p>
 					<button type="button" class="gsnake-bigbtn" id="gsnake-go">▶ 开始游戏</button>
 					<p class="gsnake-login" id="gsnake-login"></p>
@@ -223,7 +223,7 @@ function game_snake_shortcode( $atts ) {
 						<li><b>加速：</b>每吃一颗速度提升。</li>
 						<li><b>失败：</b>撞墙或撞到自己。</li>
 						<li><b>电脑：</b>方向键 / WASD，空格开始。</li>
-						<li><b>手机：</b>滑动转向。</li>
+						<li><b>手机：</b>滑动转向，或用下方方向键。</li>
 						<li><b>排行：</b>登录后成绩以昵称上榜；游客按设备记录最高一条。</li>
 					</ul>
 					<div style="text-align:center;margin-top:12px;">
@@ -231,6 +231,19 @@ function game_snake_shortcode( $atts ) {
 					</div>
 				</div>
 			</div>
+		</div>
+
+		<!-- 手机虚拟方向键（触屏设备显示） -->
+		<div class="gsnake-dpad" id="gsnake-dpad" aria-label="方向键">
+			<span></span>
+			<button type="button" class="gsnake-dbtn gsnake-dup" data-dir="up" aria-label="上">▲</button>
+			<span></span>
+			<button type="button" class="gsnake-dbtn" data-dir="left" aria-label="左">◀</button>
+			<span class="gsnake-dmid"></span>
+			<button type="button" class="gsnake-dbtn" data-dir="right" aria-label="右">▶</button>
+			<span></span>
+			<button type="button" class="gsnake-dbtn gsnake-ddown" data-dir="down" aria-label="下">▼</button>
+			<span></span>
 		</div>
 
 		<div class="gsnake-lb">

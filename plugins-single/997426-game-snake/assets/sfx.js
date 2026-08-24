@@ -30,7 +30,10 @@
 
     /** 播放音效。name 见顶部注释；opts 可覆盖音高。 */
     play: function (name, opts) {
-      if (!enabled || !ctx) return;
+      if (!enabled) return;
+      // 移动端：ctx 可能在首次交互前未创建，这里惰性创建。
+      if (!ctx) SFX.init();
+      if (!ctx) return;
       opts = opts || {};
       try {
         if (ctx.state === 'suspended') ctx.resume();
@@ -97,4 +100,10 @@
   ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
     global.addEventListener(ev, function () { SFX.init(); SFX.resume(); }, { once: false, passive: true });
   });
+
+  // iOS Safari：touchend 才解锁 AudioContext，额外挂一次。
+  global.addEventListener('touchend', function () {
+    if (ctx && ctx.state === 'suspended') ctx.resume();
+    if (!ctx) { SFX.init(); }
+  }, { passive: true });
 })(window);

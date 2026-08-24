@@ -194,6 +194,20 @@
     ts={x:e.touches[0].clientX,y:e.touches[0].clientY};
   },{passive:false});
 
+
+  /* ── 虚拟方向键（触屏） ── */
+  var DIRMAP = { up:{x:0,y:-1}, down:{x:0,y:1}, left:{x:-1,y:0}, right:{x:1,y:0} };
+  root.querySelectorAll('.gsnake-dbtn[data-dir]').forEach(function (btn) {
+    function go(e) {
+      e.preventDefault();
+      var d = DIRMAP[btn.dataset.dir];
+      if (d && running && d.x !== -dir.x && d.y !== -dir.y) nextDir = d;
+      if (!running) start();
+    }
+    btn.addEventListener('touchstart', go, { passive: false });
+    btn.addEventListener('mousedown', go);
+  });
+
   /* ── 初始化 ── */
   resize(); reset(); refreshLb();
 })();
