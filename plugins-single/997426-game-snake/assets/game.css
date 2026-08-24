@@ -1,0 +1,77 @@
+/* 997426 游戏 - 贪吃蛇 独立插件样式 */
+.gsnake {
+  --gsn-accent: #7c5cff;
+  --gsn-accent2: #00d4ff;
+  max-width: 620px; margin: 24px auto; padding: 16px;
+  background: #101326; color: #e8eaf6; border-radius: 14px;
+  font-family: system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.gsnake * { box-sizing: border-box; margin: 0; padding: 0; }
+.gsnake-title { text-align: center; margin-bottom: 10px; }
+
+/* HUD */
+.gsnake-hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+.gsnake-scores { display: flex; gap: 14px; font-size: .95rem; }
+.gsnake-scores b { color: var(--gsn-accent2); }
+.gsnake-me { color: #7ee787; font-size: .85rem; }
+.gsnake-btns { display: flex; gap: 8px; }
+.gsnake-iconbtn {
+  min-width: 44px; min-height: 44px; border-radius: 10px; cursor: pointer;
+  background: #1d2242; border: 1px solid #2c3370; color: #e8eaf6;
+  font-size: 1.1rem; display: grid; place-items: center; transition: background .15s;
+}
+.gsnake-iconbtn:hover, .gsnake-iconbtn:active { background: var(--gsn-accent); color: #fff; }
+
+/* 舞台 */
+.gsnake-stage {
+  position: relative; width: 100%; aspect-ratio: 1; background: #171b35;
+  border-radius: 12px; overflow: hidden; touch-action: none;
+  -webkit-user-select: none; user-select: none;
+}
+#gsnake-cv { display: block; width: 100%; height: 100%; }
+
+/* 遮罩层（开始/结束/介绍共用） */
+.gsnake-overlay {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  background: rgba(16,19,38,.92); text-align: center; padding: 20px; z-index: 10;
+}
+.gsnake-hidden { display: none !important; }
+.gsnake-intro { color: #b9bfe4; font-size: .9rem; line-height: 1.8; margin-bottom: 16px; }
+.gsnake-bigbtn {
+  background: linear-gradient(90deg, var(--gsn-accent), #9a6bff); border: none; color: #fff;
+  padding: 13px 36px; font-size: 1rem; border-radius: 999px; cursor: pointer;
+  font-weight: 800; min-height: 48px; box-shadow: 0 6px 20px rgba(124,92,255,.4);
+}
+.gsnake-bigbtn:active { transform: scale(.96); }
+.gsnake-login { color: #ffd166; font-size: .82rem; margin-top: 12px; }
+.gsnake-login a { color: #ffd166; text-decoration: underline; }
+
+/* 结束画面 */
+.gsnake-final { color: var(--gsn-accent2); font-size: 2rem; font-weight: 900; margin-bottom: 6px; }
+.gsnake-result { color: #ffd166; font-size: .88rem; margin-bottom: 14px; min-height: 1.3em; }
+
+/* 介绍卡 */
+#gsnake-modal .gsnake-card {
+  max-width: 400px; width: 100%; background: #1d2242; border: 1px solid #2c3370;
+  border-radius: 14px; padding: 20px; text-align: left; max-height: 100%; overflow: auto;
+}
+#gsnake-modal h4 { margin-bottom: 10px; }
+#gsnake-modal ul { list-style: none; color: #c3c8ea; font-size: .87rem; line-height: 2; }
+#gsnake-modal li b { color: var(--gsn-accent2); }
+
+/* 排行榜 */
+.gsnake-lb { margin-top: 18px; }
+.gsnake-lb h4 { margin-bottom: 8px; }
+.gsnake-lb-list { list-style: none; background: #171b35; border-radius: 10px; overflow: hidden; }
+.gsnake-lb-list li {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px; border-bottom: 1px solid #262c55; font-size: .9rem;
+}
+.gsnake-lb-list li:last-child { border-bottom: 0; }
+.gsnake-lb-empty { justify-content: center; color: #9aa1c9; }
+.gsnake-lb-rank { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: #2c3370; font-weight: 700; font-size: .78rem; flex: none; }
+.gsnake-lb-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gsnake-lb-score { font-weight: 700; color: var(--gsn-accent2); }
+li:first-child .gsnake-lb-rank { background: #ffd166; color: #000; }
+li:nth-child(2) .gsnake-lb-rank { background: #c0c0c0; color: #000; }
+li:nth-child(3) .gsnake-lb-rank { background: #cd7f32; color: #000; }
