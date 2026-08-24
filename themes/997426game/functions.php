@@ -1,0 +1,70 @@
+/*
+Theme Name: 997426 Game Platform
+Theme URI: https://github.com/zzidcn/997426小游戏
+Author: 997426
+Description: 997426小游戏平台主题 —— 响应式游戏门户，含游戏列表、分类、单页游戏播放器（自适应全屏）、排行榜与积分荣誉展示。配合 997426 游戏核心插件使用。
+Version: 1.0.0
+License: GPL-2.0+
+Text Domain: game997426
+*/
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+function theme997426_setup() {
+	add_theme_support( 'title-tag' );
+	add_theme_support( 'post-thumbnails' );
+	add_theme_support( 'html5', array( 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script' ) );
+	add_theme_support( 'responsive-embeds' );
+	register_nav_menus(
+		array(
+			'primary' => __( '主菜单', 'game997426' ),
+			'footer'  => __( '页脚菜单', 'game997426' ),
+		)
+	);
+}
+add_action( 'after_setup_theme', 'theme997426_setup' );
+
+function theme997426_assets() {
+	wp_enqueue_style(
+		'theme997426',
+		get_stylesheet_directory_uri() . '/assets/css/main.css',
+		array(),
+		'1.0.0'
+	);
+	wp_enqueue_script(
+		'theme997426',
+		get_stylesheet_directory_uri() . '/assets/js/main.js',
+		array(),
+		'1.0.0',
+		true
+	);
+
+	// 给游戏 iframe 注入配置（供 SDK 使用）。
+	if ( is_singular( 'game' ) ) {
+		wp_localize_script(
+			'theme997426',
+			'Game997426Config',
+			array(
+				'restUrl' => esc_url_raw( rest_url( 'game997426/v1' ) ),
+				'nonce'   => wp_create_nonce( 'game997426_submit' ),
+				'userId'  => get_current_user_id(),
+			)
+		);
+		wp_add_inline_script( 'theme997426', 'window.Game997426GameId=' . get_queried_object_id() . ';', 'before' );
+	}
+}
+add_action( 'wp_enqueue_scripts', 'theme997426_assets' );
+
+/** 游戏单页模板包含。 */
+function theme997426_game_template( $template ) {
+	if ( is_singular( 'game' ) ) {
+		$custom = locate_template( array( 'single-game.php' ) );
+		if ( $custom ) {
+			return $custom;
+		}
+	}
+	return $template;
+}
+add_filter( 'single_template', 'theme997426_game_template' );

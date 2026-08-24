@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>贪吃蛇 · 997426</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { height:100%; background:#101326; color:#e8eaf6;
+    font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+    overflow:hidden; touch-action:none; -webkit-user-select:none; user-select:none; }
+  #wrap { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; }
+  #hud { display:flex; gap:24px; font-weight:700; font-size:clamp(.9rem,2.5vw,1.1rem); }
+  #stage { width:min(96vw, 96vh - 60px, 560px); aspect-ratio:1; background:#171b35;
+    border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.4); position:relative; }
+  canvas { display:block; width:100%; height:100%; border-radius:12px; }
+  #overlay { position:absolute; inset:0; display:grid; place-items:center;
+    background:rgba(16,19,38,.85); border-radius:12px; text-align:center; padding:20px; }
+  #overlay h1 { font-size:clamp(1.3rem,4vw,2rem); margin-bottom:10px; }
+  #overlay p { color:#9aa1c9; margin-bottom:18px; font-size:.9rem; }
+  button { background:#7c5cff; border:none; color:#fff; padding:12px 32px;
+    font-size:1rem; border-radius:999px; cursor:pointer; font-weight:700; }
+  button:active { transform:scale(.96); }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud">
+    <span>得分 <span id="score">0</span></span>
+    <span>最高 <span id="best">0</span></span>
+  </div>
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="overlay">
+      <div>
+        <h1>🐍 贪吃蛇</h1>
+        <p>电脑：方向键 / WASD<br>手机：滑动屏幕控制方向</p>
+        <button id="startBtn">开始游戏</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../plugins/997426-game-core/assets/js/game997426-sdk.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

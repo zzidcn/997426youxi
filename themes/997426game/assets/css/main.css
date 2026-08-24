@@ -1,0 +1,147 @@
+/* ============================================================
+   997426 Game Platform — main.css
+   移动优先 · CSS 变量 · 深色游戏风
+   ============================================================ */
+:root {
+  --g99-bg: #0f1226;
+  --g99-bg-soft: #171b35;
+  --g99-card: #1d2242;
+  --g99-text: #e8eaf6;
+  --g99-muted: #9aa1c9;
+  --g99-accent: #7c5cff;
+  --g99-accent-2: #00d4ff;
+  --g99-gold: #ffd166;
+  --g99-radius: 14px;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--g99-bg);
+  color: var(--g99-text);
+  font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  line-height: 1.6;
+}
+a { color: var(--g99-accent-2); text-decoration: none; }
+a:hover { filter: brightness(1.15); }
+
+.g99-container { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+.g99-muted { color: var(--g99-muted); }
+
+/* Header */
+.g99-header {
+  background: rgba(23, 27, 53, .92);
+  backdrop-filter: blur(8px);
+  position: sticky; top: 0; z-index: 100;
+  border-bottom: 1px solid #262c55;
+}
+.g99-header-inner { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 10px 16px; }
+.g99-logo { font-size: 1.25rem; font-weight: 800; color: var(--g99-text); white-space: nowrap; }
+.g99-logo span { color: var(--g99-accent); }
+.g99-nav ul { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+.g99-nav a { padding: 6px 12px; border-radius: 8px; color: var(--g99-muted); }
+.g99-nav a:hover, .g99-nav .current-menu-item a { color: var(--g99-text); background: #232953; }
+.g99-search { margin-left: auto; }
+.g99-search input[type="search"] {
+  background: var(--g99-card); color: var(--g99-text);
+  border: 1px solid #2c3370; border-radius: 999px;
+  padding: 8px 16px; min-width: 180px; outline: none;
+}
+
+/* Hero */
+.g99-hero { text-align: center; padding: 48px 0 24px; }
+.g99-hero h1 {
+  margin: 0; font-size: clamp(1.8rem, 5vw, 3rem);
+  background: linear-gradient(90deg, var(--g99-accent), var(--g99-accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.g99-hero p { color: var(--g99-muted); margin: 8px 0 0; }
+.g99-section-title { font-size: 1.3rem; margin: 32px 0 16px; }
+
+/* 游戏卡片网格 */
+.g99-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+@media (min-width: 720px) {
+  .g99-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+}
+.g99-card {
+  display: block; background: var(--g99-card); border-radius: var(--g99-radius);
+  overflow: hidden; transition: transform .18s ease, box-shadow .18s ease;
+  color: var(--g99-text); border: 1px solid transparent;
+}
+.g99-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--g99-accent);
+  box-shadow: 0 10px 30px rgba(124, 92, 255, .25);
+}
+.g99-card-img { aspect-ratio: 4 / 3; background: var(--g99-bg-soft); display: grid; place-items: center; overflow: hidden; }
+.g99-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.g99-card-placeholder { font-size: 3rem; opacity: .5; }
+.g99-card-body { padding: 10px 12px 12px; }
+.g99-card-title { margin: 0; font-size: .98rem; line-height: 1.35; }
+.g99-card-meta { font-size: .78rem; color: var(--g99-muted); margin-top: 4px; }
+
+/* 游戏播放器 */
+.g99-player-wrap { margin: 20px auto; max-width: 960px; }
+.g99-player {
+  position: relative; width: 100%;
+  background: #000; border-radius: var(--g99-radius);
+  overflow: hidden; box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
+}
+.g99-player iframe { display: block; width: 100%; height: 100%; border: 0; }
+.g99-player.g99-fullscreen { aspect-ratio: auto !important; border-radius: 0; }
+.g99-fs-btn {
+  position: absolute; right: 10px; bottom: 10px;
+  background: rgba(15, 18, 38, .85); color: var(--g99-text);
+  border: 1px solid #2c3370; border-radius: 999px;
+  padding: 6px 14px; cursor: pointer; font-size: .85rem;
+}
+.g99-fs-btn:hover { background: var(--g99-accent); }
+.g99-controls-hint { text-align: center; color: var(--g99-muted); font-size: .88rem; }
+
+/* 单页布局 */
+.g99-game-title { margin: 24px 0 0; }
+.g99-game-layout { display: grid; gap: 24px; margin-top: 24px; }
+@media (min-width: 900px) {
+  .g99-game-layout { grid-template-columns: 1fr 320px; }
+}
+.g99-entry img { max-width: 100%; height: auto; }
+
+/* 排行榜 */
+.g99-lb-title { margin: 0 0 10px; }
+.g99-lb-list { list-style: none; margin: 0; padding: 0; background: var(--g99-card); border-radius: var(--g99-radius); overflow: hidden; }
+.g99-lb-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-bottom: 1px solid #262c55; font-size: .92rem;
+}
+.g99-lb-row:last-child { border-bottom: 0; }
+.g99-lb-rank {
+  width: 26px; height: 26px; border-radius: 50%; flex: none;
+  display: grid; place-items: center; background: #2c3370; font-weight: 700; font-size: .8rem;
+}
+.g99-lb-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.g99-lb-score { font-weight: 700; color: var(--g99-accent-2); }
+.g99-top1 .g99-lb-rank { background: var(--g99-gold); color: #000; }
+.g99-top2 .g99-lb-rank { background: #c0c0c0; color: #000; }
+.g99-top3 .g99-lb-rank { background: #cd7f32; color: #000; }
+.g99-lb-empty { justify-content: center; color: var(--g99-muted); }
+
+/* 用户面板 / 徽章 */
+.g99-userpanel { background: var(--g99-card); border-radius: var(--g99-radius); padding: 14px 16px; margin: 20px 0; }
+.g99-userpanel-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.g99-points { color: var(--g99-gold); font-weight: 700; }
+.g99-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.g99-badge {
+  background: #232953; border: 1px solid #2c3370; border-radius: 999px;
+  padding: 4px 12px; font-size: .8rem;
+}
+
+/* Footer */
+.g99-footer { margin-top: 56px; padding: 24px 0; border-top: 1px solid #262c55; color: var(--g99-muted); text-align: center; font-size: .85rem; }
+
+/* 全站榜 */
+.g99-site-lb { max-width: 640px; }

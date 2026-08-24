@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>2048 · 997426</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { height:100%; background:#101326; color:#e8eaf6;
+    font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+    overflow:hidden; touch-action:none; -webkit-user-select:none; user-select:none; }
+  #wrap { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; }
+  #hud { display:flex; gap:24px; font-weight:700; font-size:clamp(.9rem,2.5vw,1.1rem); }
+  #stage { width:min(92vw, 92vh - 70px, 480px); aspect-ratio:1; position:relative;
+    background:#171b35; border-radius:12px; padding:2.5%; touch-action:none; }
+  #grid { display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,1fr);
+    gap:2.5%; width:100%; height:100%; }
+  .tile { border-radius:10px; display:grid; place-items:center;
+    font-weight:800; font-size:clamp(1rem,4vw,1.6rem);
+    background:#1d2242; color:#e8eaf6; transition:transform .08s ease; }
+  .t2{background:#3d3a65}.t4{background:#4a4480}.t8{background:#5b54c9}.t16{background:#7c5cff}
+  .t32{background:#9a6bff}.t64{background:#c05cff}.t128{background:#ff5c9e}.t256{background:#ff5c7a}
+  .t512{background:#ff8f5c;color:#101326}.t1024{background:#ffd166;color:#101326}.t2048{background:#00d4ff;color:#101326}
+  #overlay { position:absolute; inset:0; display:grid; place-items:center;
+    background:rgba(16,19,38,.88); border-radius:12px; text-align:center; padding:20px; z-index:5;}
+  #overlay h1 { font-size:clamp(1.3rem,4vw,2rem); margin-bottom:10px; }
+  #overlay p { color:#9aa1c9; margin-bottom:18px; font-size:.9rem; }
+  button { background:#7c5cff; border:none; color:#fff; padding:12px 32px;
+    font-size:1rem; border-radius:999px; cursor:pointer; font-weight:700; }
+  button:active { transform:scale(.96); }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud">
+    <span>得分 <span id="score">0</span></span>
+    <span>最高 <span id="best">0</span></span>
+  </div>
+  <div id="stage">
+    <div id="grid"></div>
+    <div id="overlay">
+      <div>
+        <h1>🔢 2048</h1>
+        <p>电脑：方向键 / WASD<br>手机：滑动屏幕合并数字<br>目标：合成 2048！</p>
+        <button id="startBtn">开始游戏</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../plugins/997426-game-core/assets/js/game997426-sdk.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
