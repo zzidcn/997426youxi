@@ -60,8 +60,11 @@ function theme997426_assets() {
 		true
 	);
 
-	// 给游戏 iframe 注入配置（供 SDK 使用）。
+	// 给游戏 iframe 注入配置（供 SDK 代理使用）。
+	// 注意：登录用户的 nonce 因人而异，页面必须禁止 CDN/浏览器缓存，
+	// 否则 A 用户的 nonce 被缓存后 B 用户使用会 403。
 	if ( is_singular( 'game' ) ) {
+		header( 'Cache-Control: no-store, no-cache, must-revalidate, max-age=0' );
 		wp_localize_script(
 			'theme997426',
 			'Game997426Config',
