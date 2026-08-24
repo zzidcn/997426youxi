@@ -39,13 +39,21 @@ $ratio    = $h > 0 ? $w / $h : 1.5;
 		<?php endif; ?>
 
 		<div class="g99-game-layout">
-			<section class="g99-game-desc">
+		<section class="g99-game-desc">
 				<h2>游戏介绍</h2>
 				<div class="g99-entry"><?php the_content(); ?></div>
-				<?php echo do_shortcode( '[user_points]' ); ?>
+				<?php
+				if ( shortcode_exists( 'user_points' ) ) {
+					echo do_shortcode( '[user_points]' );
+				}
+				?>
 			</section>
 			<aside class="g99-game-side">
-				<?php echo do_shortcode( '[game_leaderboard limit="10" period="all"]' ); ?>
+				<?php
+				if ( shortcode_exists( 'game_leaderboard' ) ) {
+					echo do_shortcode( '[game_leaderboard limit="10" period="all"]' );
+				}
+				?>
 			</aside>
 		</div>
 	</article>

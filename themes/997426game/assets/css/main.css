@@ -153,3 +153,9 @@ a:hover { filter: brightness(1.15); }
   background: var(--g99-card); border-radius: 8px; color: var(--g99-muted);
 }
 .g99-pagination .current { background: var(--g99-accent); color: #fff; }
+
+/* 提示框 */
+.g99-notice {
+  background: #2b2440; border: 1px solid var(--g99-accent);
+  border-radius: var(--g99-radius); padding: 16px 20px; margin: 24px 0;
+}
