@@ -48,6 +48,7 @@ class GAME997426_Shortcodes {
 			'post_type'      => 'game',
 			'posts_per_page' => (int) $atts['limit'],
 			'post_status'    => 'publish',
+			'no_found_rows'  => true, // 无需分页计数，省一次 COUNT 查询。
 		);
 		if ( $atts['category'] ) {
 			$args['tax_query'] = array( // phpcs:ignore
@@ -58,6 +59,14 @@ class GAME997426_Shortcodes {
 				),
 			);
 		}
+
+		// 卡片网格缓存 5 分钟（后台保存游戏时自动失效）。
+		$cache_key = 'g99_grid_' . md5( (string) wp_json_encode( $args ) );
+		$cached    = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
 		$games = new WP_Query( $args );
 
 		ob_start();
@@ -87,7 +96,10 @@ class GAME997426_Shortcodes {
 		}
 		echo '</div>';
 		wp_reset_postdata();
-		return ob_get_clean();
+		$html = ob_get_clean();
+
+		set_transient( $cache_key, $html, 5 * MINUTE_IN_SECONDS );
+		return $html;
 	}
 
 	/** 排行榜。 */
@@ -163,3 +175,17 @@ class GAME997426_Shortcodes {
 add_shortcode( 'games_grid', array( 'GAME997426_Shortcodes', 'games_grid' ) );
 add_shortcode( 'game_leaderboard', array( 'GAME997426_Shortcodes', 'leaderboard' ) );
 add_shortcode( 'user_points', array( 'GAME997426_Shortcodes', 'user_points' ) );
+
+/**
+ * 保存/更新游戏时清空相关缓存（保持卡片与游玩次数即时刷新）。
+ */
+function game997426_flush_caches( $post_id ) {
+	if ( 'game' !== get_post_type( $post_id ) ) {
+		return;
+	}
+	global $wpdb;
+	$wpdb->query(
+		"DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_g99_grid_%' OR option_name LIKE '_transient_timeout_g99_grid_%'" // phpcs:ignore
+	);
+}
+add_action( 'save_post', 'game997426_flush_caches' );

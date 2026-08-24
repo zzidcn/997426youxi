@@ -27,6 +27,13 @@ function theme997426_setup() {
 add_action( 'after_setup_theme', 'theme997426_setup' );
 
 function theme997426_assets() {
+	// REST API 预连接：游戏页 SDK 首次请求更快（性能规范 resource hints）。
+	$host = parse_url( home_url(), PHP_URL_HOST );
+	printf(
+		'<link rel="preconnect" href="%s" crossorigin>' . "\n",
+		esc_url( 'https://' . $host )
+	);
+
 	wp_enqueue_style(
 		'theme997426',
 		get_stylesheet_directory_uri() . '/assets/css/main.css',

@@ -60,7 +60,8 @@
       return readyPromise;
     },
 
-    _post: function (path, body) {
+    _post: function (path, body, retries) {
+      retries = retries === undefined ? 1 : retries;
       var cfg = SDK._cfg;
       return fetch(cfg.restUrl + path, {
         method: body ? 'POST' : 'GET',
@@ -69,6 +70,10 @@
           : {},
         credentials: 'include',
         body: body ? JSON.stringify(body) : undefined,
+      }).catch(function (err) {
+        // 网络错误自动重试一次（4xx 业务错误不重试）。
+        if (retries > 0) return SDK._post(path, body, retries - 1);
+        throw err;
       }).then(function (r) { return r.json(); });
     },
 

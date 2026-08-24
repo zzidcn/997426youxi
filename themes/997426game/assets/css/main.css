@@ -145,3 +145,11 @@ a:hover { filter: brightness(1.15); }
 
 /* 全站榜 */
 .g99-site-lb { max-width: 640px; }
+
+/* 分页 */
+.g99-pagination { margin-top: 32px; text-align: center; }
+.g99-pagination .page-numbers {
+  display: inline-block; padding: 6px 14px; margin: 0 3px;
+  background: var(--g99-card); border-radius: 8px; color: var(--g99-muted);
+}
+.g99-pagination .current { background: var(--g99-accent); color: #fff; }
