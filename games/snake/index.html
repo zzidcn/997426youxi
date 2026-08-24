@@ -62,6 +62,7 @@
     <div class="btns">
       <button class="iconbtn" id="infoBtn" title="游戏介绍" aria-label="游戏介绍">❓</button>
       <button class="iconbtn" id="fsBtn" title="全屏" aria-label="全屏">⛶</button>
+      <button class="iconbtn" id="quitBtn" title="结束游戏" aria-label="结束游戏" style="display:none;">⏹</button>
     </div>
   </div>
 
@@ -111,21 +112,32 @@
 <script src="game.js"></script>
 <script>
 /**
- * 兼容 Cloudflare Rocket Loader：若 SDK 未加载（script 被改写 type 延迟），
- * 动态注入兜底加载，确保 Game997426 对象存在。
+ * SDK 兜底加载：兼容多种部署位置。
+ * 依次尝试：wp-content 插件路径 → 站点根 plugins 路径 → 原相对路径。
+ * Rocket Loader 改写静态 script 时由此兜底恢复。
  */
 (function () {
-  function ensureSdk() {
-    if (window.Game997426) return;
+  var CANDIDATES = [
+    '/wp-content/plugins/997426-game-core/assets/js/game997426-sdk.js',
+    '/plugins/997426-game-core/assets/js/game997426-sdk.js',
+    '../../plugins/997426-game-core/assets/js/game997426-sdk.js',
+  ];
+  var idx = 0;
+  function tryNext() {
+    if (window.Game997426 || idx >= CANDIDATES.length) return;
     var s = document.createElement('script');
-    s.src = '../../plugins/997426-game-core/assets/js/game997426-sdk.js';
+    s.src = CANDIDATES[idx++];
+    s.onload = function () { if (!window.Game997426) tryNext(); };
+    s.onerror = tryNext;
     document.body.appendChild(s);
   }
-  if (document.readyState === 'complete') {
-    setTimeout(ensureSdk, 300);
-  } else {
-    window.addEventListener('load', function () { setTimeout(ensureSdk, 300); });
+  function ensureSdk() {
+    if (window.Game997426) return;
+    // 静态标签可能已被 Rocket Loader 恢复执行，稍等再兜底。
+    setTimeout(tryNext, 300);
   }
+  if (document.readyState === 'complete') ensureSdk();
+  else window.addEventListener('load', ensureSdk);
 })();
 </script>
 </body>

@@ -19,6 +19,7 @@
   var infoBtn  = document.getElementById('infoBtn');
   var infoClose= document.getElementById('infoClose');
   var fsBtn    = document.getElementById('fsBtn');
+  var quitBtn  = document.getElementById('quitBtn');
   var scoreEl  = document.getElementById('score');
   var bestEl   = document.getElementById('best');
   var finalScoreEl = document.getElementById('finalScore');
@@ -58,6 +59,11 @@
       infoModal.classList.add('hidden');
       resume();
     }
+  });
+
+  // ── ② 结束游戏按钮：游戏中主动结束，按当前成绩结算上报 ──
+  quitBtn.addEventListener('click', function () {
+    if (running) gameOver();
   });
 
   // ── 暂停/恢复（看介绍时暂停） ──
@@ -161,6 +167,7 @@
     reset();
     startOverlay.classList.add('hidden');
     overOverlay.classList.add('hidden');
+    quitBtn.style.display = ''; // 游戏中显示结束按钮
     running = true;
     timer = setInterval(step, speed);
   }
@@ -172,6 +179,7 @@
     running = false;
     clearInterval(timer);
     timer = null;
+    quitBtn.style.display = 'none'; // 结算界面隐藏结束按钮
     draw();
 
     finalScoreEl.textContent = score;

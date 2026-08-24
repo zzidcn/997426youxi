@@ -15,6 +15,7 @@
   var infoBtn  = document.getElementById('infoBtn');
   var infoClose= document.getElementById('infoClose');
   var fsBtn    = document.getElementById('fsBtn');
+  var quitBtn  = document.getElementById('quitBtn');
   var scoreEl  = document.getElementById('score');
   var bestEl   = document.getElementById('best');
   var finalScoreEl = document.getElementById('finalScore');
@@ -37,6 +38,11 @@
   }
   document.addEventListener('fullscreenchange', syncFsIcon);
   document.addEventListener('webkitfullscreenchange', syncFsIcon);
+
+  // ── ② 结束游戏按钮：主动结束并结算上报 ──
+  quitBtn.addEventListener('click', function () {
+    if (running) end();
+  });
 
   // ── ④ 游戏介绍（打开时暂停） ──
   var pausedByInfo = false;
@@ -135,6 +141,7 @@
   // ── ② 结束游戏：成绩上报 ──
   async function end() {
     running = false;
+    quitBtn.style.display = 'none';
     finalScoreEl.textContent = score;
     scoreResultEl.textContent = '成绩上报中…';
     overOverlay.classList.remove('hidden');
@@ -164,6 +171,7 @@
     render();
     startOverlay.classList.add('hidden');
     overOverlay.classList.add('hidden');
+    quitBtn.style.display = '';
     running = true;
   }
   startBtn.addEventListener('click', start);
