@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: 997426 游戏 - 贪吃蛇
- * Description: 贪吃蛇小游戏独立插件。用法：在任意文章/页面写短代码 [game_snake]。自带独立排行榜（本插件专属数据表）。
- * Version:     1.0.0
+ * Description: 贪吃蛇小游戏独立插件。启用后自动创建并发布游戏页面，无需手写短代码。每款游戏独立数据表与排行榜。
+ * Version:     1.1.0
  * Author:      997426
  * License:     GPL-2.0-or-later
  * Requires at least: 6.0
@@ -13,11 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GAME_SNAKE_VER', '1.0.0' );
+define( 'GAME_SNAKE_VER', '1.1.0' );
 
-/* ============================================================
- * 数据表：本游戏专属排行榜（每用户/IP 取最高分）
- * ============================================================ */
+/* 页面 slug 与标题（自动建页用） */
+define( 'GAME_SNAKE_PAGE_SLUG', 'game-snake' );
+define( 'GAME_SNAKE_PAGE_TITLE', '🐍 贪吃蛇' );
+
 final class GameSnake {
 
 	const TABLE_SUFFIX = 'game997426_snake_scores';
@@ -27,27 +28,15 @@ final class GameSnake {
 		global $wpdb;
 		return $wpdb->prefix . self::TABLE_SUFFIX;
 	}
-
-	public static function activate() {
-		global $wpdb;
-		$charset = $wpdb->get_charset_collate();
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		dbDelta( "CREATE TABLE {$this_table} (
-			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-			user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
-			user_name VARCHAR(60) NOT NULL DEFAULT '',
-			ip_hash VARCHAR(32) NOT NULL DEFAULT '',
-			score BIGINT NOT NULL DEFAULT 0,
-			created_at DATETIME NOT NULL,
-			PRIMARY KEY  (id),
-			KEY score (score DESC),
-			KEY created (created_at)
-		) {$charset};" );
-	}
 }
-// dbDelta 需要真实表名变量。
+
+/* ============================================================
+ * 激活：建表 + 自动创建游戏页面（幂等，重复激活不会重复建页）
+ * ============================================================ */
 function game_snake_activate() {
 	global $wpdb;
+
+	// 1) 数据表。
 	$table   = $wpdb->prefix . GameSnake::TABLE_SUFFIX;
 	$charset = $wpdb->get_charset_collate();
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -62,21 +51,78 @@ function game_snake_activate() {
 		KEY score (score DESC),
 		KEY created (created_at)
 	) {$charset};" );
+
+	// 2) 自动创建并发布游戏页面（已存在则跳过）。
+	$existing = get_page_by_path( GAME_SNAKE_PAGE_SLUG, OBJECT, array( 'page' ) );
+	if ( ! $existing ) {
+		$page_id = wp_insert_post(
+			array(
+				'post_title'     => GAME_SNAKE_PAGE_TITLE,
+				'post_name'      => GAME_SNAKE_PAGE_SLUG,
+				'post_content'   => "[game_snake]\n\n🎮 经典贪吃蛇：吃果实变长变快，撞墙或撞到自己即结束。支持电脑键盘与手机触屏，成绩实时计入本游戏排行榜。",
+				'post_status'    => 'publish',
+				'post_type'      => 'page',
+				'comment_status' => 'closed',
+			)
+		);
+		if ( $page_id && ! is_wp_error( $page_id ) ) {
+			// 记录页面 ID，停用时据此回收站。
+			update_option( 'game_snake_page_id', $page_id );
+			set_transient( 'game_snake_just_created', $page_id, 60 );
+		}
+	} else {
+		update_option( 'game_snake_page_id', $existing->ID );
+		// 页面若在回收站/草稿则恢复发布。
+		if ( 'publish' !== $existing->post_status ) {
+			wp_update_post(
+				array(
+					'ID'          => $existing->ID,
+					'post_status' => 'publish',
+				)
+			);
+		}
+	}
+
 	flush_rewrite_rules();
 }
 register_activation_hook( __FILE__, 'game_snake_activate' );
 
+/** 停用：把自动创建的页面移入回收站（不硬删，用户数据安全）。 */
 function game_snake_deactivate() {
+	$page_id = get_option( 'game_snake_page_id' );
+	if ( $page_id && 'page' === get_post_type( $page_id ) && 'trash' !== get_post_status( $page_id ) ) {
+		wp_trash_post( $page_id );
+	}
 	flush_rewrite_rules();
 }
 register_deactivation_hook( __FILE__, 'game_snake_deactivate' );
 
-/** 卸载时删除本游戏数据表。 */
+/** 卸载：删除数据表 + 硬删页面 + 清理 option。 */
 function game_snake_uninstall() {
 	global $wpdb;
 	$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . GameSnake::TABLE_SUFFIX ); // phpcs:ignore
+
+	$page_id = get_option( 'game_snake_page_id' );
+	if ( $page_id ) {
+		wp_delete_post( $page_id, true ); // 强制硬删（含回收站）。
+	}
+	delete_option( 'game_snake_page_id' );
 }
 register_uninstall_hook( __FILE__, 'game_snake_uninstall' );
+
+/** 激活后给管理员一个带链接的提示。 */
+function game_snake_admin_notice() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	$page_id = get_transient( 'game_snake_just_created' );
+	if ( ! $page_id ) {
+		return;
+	}
+	delete_transient( 'game_snake_just_created' );
+	echo '<div class="notice notice-success is-dismissible"><p>🐍 <strong>贪吃蛇已安装！</strong> 游戏页面已自动创建并发布：<a href="' . esc_url( get_permalink( $page_id ) ) . '">' . esc_html( get_permalink( $page_id ) ) . '</a></p></div>';
+}
+add_action( 'admin_notices', 'game_snake_admin_notice' );
 
 /* ============================================================
  * 前端资源 + 短代码
@@ -178,9 +224,9 @@ function game_snake_shortcode( $atts ) {
 add_shortcode( 'game_snake', 'game_snake_shortcode' );
 
 /* ============================================================
- * REST API（本插件命名空间）
+ * REST API
  * ============================================================ */
-function game_snake_rest( $r ) {
+function game_snake_rest() {
 	register_rest_route(
 		GameSnake::NS,
 		'/score',
