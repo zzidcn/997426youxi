@@ -6,6 +6,20 @@
   background: #101326; color: #e8eaf6; border-radius: 14px;
   font-family: system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
+/* 全屏：手机竖屏优先 */
+.g2048:fullscreen {
+  max-width: none; margin: 0; border-radius: 0;
+  width: 100vw; height: 100vh; height: 100dvh;
+  padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
+           max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  display: flex; flex-direction: column; justify-content: center;
+}
+.g2048:-webkit-full-screen { max-width:none; margin:0; border-radius:0; width:100vw; height:100%; }
+.g2048:fullscreen .g2048-stage,
+.g2048:-webkit-full-screen .g2048-stage {
+  width: min(96vw, 92vh - 70px);
+  margin: 0 auto;
+}
 .g2048 * { margin:0; padding:0; box-sizing:border-box; }
 .g2048-title { text-align:center; margin-bottom:10px; }
 
@@ -71,8 +85,9 @@
 #g2048-modal li b { color:var(--g-accent2); }
 
 /* 排行榜 */
-.g2048-lb { margin-top:18px; }
-.g2048-lb h4 { margin-bottom:8px; }
+.g2048-lb { margin-top: 18px; }
+.g2048-lb h4 { margin-bottom: 8px; }
+.g2048-lb-tip { color: #9aa1c9; font-size: .74rem; font-weight: 400; }
 .g2048-lb-list { list-style:none; background:#171b35; border-radius:10px; overflow:hidden; }
 .g2048-lb-list li {
   display:flex; align-items:center; gap:10px;

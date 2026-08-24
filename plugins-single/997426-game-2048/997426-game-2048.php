@@ -2,7 +2,7 @@
 /**
  * Plugin Name: 997426 游戏 - 2048
  * Description: 2048 小游戏独立插件。启用后自动创建并发布游戏页面，自动接入游戏大厅与全站积分排行。
- * Version:     1.0.0
+ * Version:     1.1.0
  * Author:      997426
  * License:     GPL-2.0-or-later
  * Requires at least: 6.0
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GAME_2048_VER', '1.0.0' );
+define( 'GAME_2048_VER', '1.1.0' );
 define( 'GAME_2048_PAGE_SLUG', 'game-2048' );
 define( 'GAME_2048_PAGE_TITLE', '🔢 2048' );
 
@@ -210,7 +210,7 @@ function game_2048_shortcode( $atts ) {
 		</div>
 
 		<div class="g2048-lb">
-			<h4>🏆 本游戏排行榜</h4>
+			<h4>🏆 本游戏排行榜 <span class="g2048-lb-tip">（成绩约 1 分钟内同步，稍作休息即可看到最新排名）</span></h4>
 			<ol class="g2048-lb-list" id="g2048-lb"><li class="g2048-lb-empty">加载中…</li></ol>
 		</div>
 	</div>

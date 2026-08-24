@@ -60,6 +60,9 @@
     draw();
   }
   window.addEventListener('resize', resize);
+  document.addEventListener('fullscreenchange', function(){ setTimeout(resize, 80); });
+  document.addEventListener('webkitfullscreenchange', function(){ setTimeout(resize, 80); });
+  window.addEventListener('orientationchange', function(){ setTimeout(resize, 200); });
 
   /* ── 游戏核心 ── */
   function spawnFood() {
