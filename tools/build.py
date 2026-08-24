@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-997426小游戏平台 — 一键打包脚本
-将主题、插件、游戏目录分别打包为可直接在 WordPress 后台上传的 zip，
-并在 dist/ 下生成整合包与纯游戏合集 games.zip。
+997426小游戏平台 — 一键打包脚本（v2 插件架构）
+自动发现 plugins-single/ 下所有游戏/组件插件并打包，
+生成 dist/ 下：主题包、大厅包、各游戏包、整合包。
 
 用法：
     python tools/build.py            # 打包全部
@@ -16,14 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
-
-# (源目录相对路径, zip 内顶层目录名, 输出文件名)
-TARGETS = [
-    ("themes/997426game", "997426game", "997426game-theme.zip"),
-    ("plugins/997426-game-core", "997426-game-core", "997426-game-core-plugin.zip"),
-    ("games/snake", "snake", "game-snake.zip"),
-    ("games/2048", "2048", "game-2048.zip"),
-]
+SINGLE = ROOT / "plugins-single"
 
 EXCLUDE_NAMES = {".git", ".gitignore", "node_modules", ".DS_Store", "Thumbs.db"}
 
@@ -36,26 +29,8 @@ def make_zip(src: Path, top_dir: str, out_file: Path) -> int:
             if any(part in EXCLUDE_NAMES for part in path.parts):
                 continue
             if path.is_file():
-                arcname = Path(top_dir) / path.relative_to(src)
-                zf.write(path, str(arcname))
+                zf.write(path, str(Path(top_dir) / path.relative_to(src)))
                 count += 1
-    return count
-
-
-def make_games_bundle(out_file: Path) -> int:
-    """打包 games/ 全部游戏为 games.zip（内部顶层目录为各游戏 slug）。"""
-    games_dir = ROOT / "games"
-    count = 0
-    with zipfile.ZipFile(out_file, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
-        for game in sorted(games_dir.iterdir()):
-            if not game.is_dir():
-                continue
-            for path in sorted(game.rglob("*")):
-                if any(part in EXCLUDE_NAMES for part in path.parts):
-                    continue
-                if path.is_file():
-                    zf.write(path, str(path.relative_to(games_dir)))
-                    count += 1
     return count
 
 
@@ -66,31 +41,29 @@ def main() -> int:
 
     if args.clean and DIST.exists():
         shutil.rmtree(DIST)
-
     DIST.mkdir(exist_ok=True)
+
     print(f"输出目录: {DIST}\n")
-
     total = 0
-    for src_rel, top_dir, out_name in TARGETS:
-        src = ROOT / src_rel
-        if not src.is_dir():
-            print(f"[跳过] {src_rel} 不存在")
-            continue
-        out = DIST / out_name
-        n = make_zip(src, top_dir, out)
-        total += n
-        size_kb = out.stat().st_size / 1024
-        print(f"[OK] {out_name:<32} {n:>3} 个文件  {size_kb:>8.1f} KB")
 
-    # games.zip：全部游戏合集（解压到站点根即可）
-    bundle = DIST / "games.zip"
-    n = make_games_bundle(bundle)
+    # 1) 主题。
+    theme_src = ROOT / "themes" / "997426game"
+    out = DIST / "997426game-theme.zip"
+    n = make_zip(theme_src, "997426game", out)
     total += n
-    print(f"\n[OK] 游戏合集 games.zip           {n:>3} 个文件  "
-          f"{bundle.stat().st_size / 1024:.1f} KB")
-    print("     内含各游戏目录（snake/、2048/...），解压到站点根即为 /games/<slug>/")
+    print(f"[OK] 997426game-theme.zip            {n:>3} 个文件  {out.stat().st_size/1024:>8.1f} KB")
 
-    # 整合包：整个仓库内容（不含 .git 与 dist 自身）
+    # 2) 自动发现 plugins-single/ 全部插件（主题外每个子目录一个 zip）。
+    for plugin_dir in sorted(SINGLE.iterdir()):
+        if not plugin_dir.is_dir():
+            continue
+        out = DIST / f"{plugin_dir.name}-plugin.zip"
+        n = make_zip(plugin_dir, plugin_dir.name, out)
+        total += n
+        print(f"[OK] {plugin_dir.name}-plugin.zip".ljust(37) +
+              f"{n:>3} 个文件  {out.stat().st_size/1024:>8.1f} KB")
+
+    # 3) 整合包：整个仓库内容（不含 .git 与 dist 自身）。
     full = DIST / "997426youxi-full.zip"
     n = 0
     with zipfile.ZipFile(full, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
@@ -102,14 +75,9 @@ def main() -> int:
                 zf.write(path, str(Path("997426youxi") / rel))
                 n += 1
     total += n
-    print(f"[OK] 整合包 997426youxi-full.zip   {n:>3} 个文件  "
-          f"{full.stat().st_size / 1024:.1f} KB")
+    print(f"[OK] 整合包 997426youxi-full.zip     {n:>3} 个文件  {full.stat().st_size/1024:>8.1f} KB")
 
-    print(f"\n完成 ✅  共 {total} 个文件。")
-    print("WordPress 安装：")
-    print("  · 外观→主题→上传 997426game-theme.zip 后启用")
-    print("  · 插件→安装插件→上传 997426-game-core-plugin.zip 后激活（自动建表）")
-    print("  · games.zip 解压到站点根目录 → /games/<slug>/ 即可游玩")
+    print(f"\n完成 ✅  共 {total} 个文件。新游戏插件放入 plugins-single/ 后重新运行即可。")
     return 0
 
 
