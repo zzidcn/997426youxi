@@ -56,6 +56,7 @@ metadata:
 
 ## 上架前自查
 
+- [ ] **所有 .php 文件必须以 `<?php` 开标签开头**（曾因 functions.php 以注释开头无开标签，导致源码原样输出到页面——本地用 grep 检查一遍）
 - [ ] **主题 zip 根目录必须有 style.css（含主题头注释），否则 WordPress 报"缺少 style.css"拒绝安装**（v1.0.1 已修复）
 - [ ] 浏览器直接打开 index.html 可玩、无控制台报错
 - [ ] 桌面 Chrome + 手机（微信/Safari）实测通过；横竖屏切换正常
