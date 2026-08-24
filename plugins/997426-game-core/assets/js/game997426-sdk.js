@@ -1,19 +1,14 @@
 /**
- * 997426 游戏 SDK v1.0
+ * 997426 游戏 SDK v2.0
  * ============================================================
- * 所有接入 997426 小游戏平台的 HTML5 游戏通过本 SDK：
- *   1. 上报成绩到统一排行榜；
- *   2. 获取当前玩家信息 / 积分 / 徽章；
- *   3. 拉取排行榜数据自行渲染。
+ * 核心变化：所有 API 调用默认经由父页面代理（postMessage），
+ * 由 WordPress 页面（带登录态）转发到 REST API。
+ * 彻底解决 iframe 内 Cookie 丢失导致的"游客模式"问题。
  *
- * 用法（在游戏 iframe 内）：
- *   const sdk = await Game997426.ready();          // 等待 SDK 初始化
- *   sdk.submitScore(12345);                        // 上报成绩
- *   const me = await sdk.getMe();                  // {logged_in, name, points, badges}
- *   const lb = await sdk.getLeaderboard(10,'all'); // {rows:[{user_name,score}]}
- *
- * 若游戏运行在跨域 iframe 中且拿不到 Game997426Config，
- * SDK 会自动降级为 postMessage 协议与父页面通信。
+ * 游戏侧用法不变：
+ *   const sdk = await Game997426.ready();
+ *   await sdk.submitScore(12345);
+ *   const me = await sdk.getMe();
  */
 (function (global) {
   'use strict';
@@ -21,7 +16,32 @@
   var CONFIG = global.Game997426Config || null;
   var readyPromise = null;
 
-  /** 从父窗口请求配置（跨域 iframe 场景）。 */
+  /** 父页面代理请求：postMessage 往返。 */
+  function proxyCall(msgId, action, payload) {
+    return new Promise(function (resolve, reject) {
+      if (!global.parent || global.parent === global) {
+        return reject(new Error('no-parent'));
+      }
+      function onMsg(e) {
+        if (e.data && e.data.type === 'game997426:proxy-result' && e.data.msgId === msgId) {
+          global.removeEventListener('message', onMsg);
+          if (e.data.ok) resolve(e.data.data);
+          else reject(new Error(e.data.error || 'proxy-error'));
+        }
+      }
+      global.addEventListener('message', onMsg);
+      global.parent.postMessage(
+        { type: 'game997426:proxy', msgId: msgId, action: action, payload: payload },
+        '*'
+      );
+      setTimeout(function () {
+        global.removeEventListener('message', onMsg);
+        reject(new Error('proxy-timeout'));
+      }, 8000);
+    });
+  }
+
+  /** 从父窗口请求基础配置（游戏 ID 等）。 */
   function fetchConfigFromParent() {
     return new Promise(function (resolve) {
       if (!global.parent || global.parent === global) return resolve(null);
@@ -55,45 +75,59 @@
       readyPromise = (CONFIG ? Promise.resolve(normalize(CONFIG)) : fetchConfigFromParent().then(normalize))
         .then(function (cfg) {
           SDK._cfg = cfg;
+          // 同域直连时预热一次 ready()，供身份显示等使用；
+          // iframe 场景 getMe/submitScore 会自动走父页面代理。
           return SDK;
         });
       return readyPromise;
     },
 
-    _post: function (path, body, retries) {
-      retries = retries === undefined ? 1 : retries;
-      var cfg = SDK._cfg;
+    _callApi: function (action, payload) {
+      // 首选父页面代理（登录态在父页面，最可靠）。
+      return proxyCall('m' + Date.now() + Math.random().toString(36).slice(2, 6), action, payload)
+        .catch(function (err) {
+          // 无父页面（本地调试）或代理超时 → 直连 REST 兜底。
+          if (err.message === 'no-parent') return SDK._direct(action, payload);
+          throw err;
+        });
+    },
+
+    /** 直连 REST（兜底）。 */
+    _direct: function (action, payload) {
+      var cfg = SDK._cfg || normalize(null);
+      var path, body;
+      if (action === 'me') {
+        path = '/me';
+      } else if (action === 'leaderboard') {
+        path = '/leaderboard?game_id=' + encodeURIComponent(payload.game_id) +
+          '&limit=' + encodeURIComponent(payload.limit || 10) +
+          '&period=' + encodeURIComponent(payload.period || 'all');
+      } else { // submit
+        path = '/score';
+        body = payload;
+      }
       return fetch(cfg.restUrl + path, {
         method: body ? 'POST' : 'GET',
-        headers: body
-          ? { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.nonce }
-          : {},
+        headers: body ? { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.nonce } : {},
         credentials: 'include',
         body: body ? JSON.stringify(body) : undefined,
-      }).catch(function (err) {
-        // 网络错误自动重试一次（4xx 业务错误不重试）。
-        if (retries > 0) return SDK._post(path, body, retries - 1);
-        throw err;
       }).then(function (r) { return r.json(); });
     },
 
     /**
      * 上报成绩。
-     * @param {number} score 分数（非负整数）
-     * @param {object} [opts] {extra:string}
      * @returns {Promise<{ok,best,rank,points_awarded,total_points}>}
      */
     submitScore: function (score, opts) {
       opts = opts || {};
-      var cfg = SDK._cfg;
       var gameId = this._gameId || parseInt(new URLSearchParams(location.search).get('game_id'), 10) || 0;
-      return SDK._post('/score', {
+      var payload = {
         game_id: gameId,
         score: Math.max(0, Math.round(Number(score) || 0)),
-        nonce: cfg.nonce,
+        nonce: (SDK._cfg && SDK._cfg.nonce) || '',
         extra: String(opts.extra || ''),
-      }).then(function (res) {
-        // 广播给父页面，便于主题弹出提示。
+      };
+      return SDK._callApi('submit', payload).then(function (res) {
         try {
           global.parent.postMessage({ type: 'game997426:score-result', result: res }, '*');
         } catch (e) { /* ignore */ }
@@ -103,32 +137,28 @@
 
     /** 当前用户信息。 */
     getMe: function () {
-      return SDK._post('/me');
+      return SDK._callApi('me');
     },
 
-    /**
-     * 排行榜。
-     * @param {number} [limit=10]
-     * @param {string} [period='all'] all|day|week|month
-     */
+    /** 排行榜。period: all|day|week|month */
     getLeaderboard: function (limit, period) {
-      return SDK._post('/leaderboard?game_id=' + encodeURIComponent(this._gameId || 0) +
-        '&limit=' + encodeURIComponent(limit || 10) +
-        '&period=' + encodeURIComponent(period || 'all'));
+      return SDK._callApi('leaderboard', {
+        game_id: this._gameId || parseInt(new URLSearchParams(location.search).get('game_id'), 10) || 0,
+        limit: limit || 10,
+        period: period || 'all',
+      });
     },
 
     _gameId: 0,
-    /** 由宿主页面注入的游戏 ID。 */
     setGameId: function (id) { this._gameId = parseInt(id, 10) || 0; },
   };
 
-  // 宿主页面可通过 window.Game997426GameId 指定游戏 ID。
   if (global.Game997426GameId) SDK.setGameId(global.Game997426GameId);
 
   global.Game997426 = SDK;
   global.Game997426.ready = SDK.init.bind(SDK);
 
-  // 响应父页面的配置请求（本页面作为 iframe 时）。
+  // 响应父页面的配置请求。
   global.addEventListener('message', function (e) {
     if (e.data && e.data.type === 'game997426:request-config' && CONFIG) {
       e.source.postMessage({ type: 'game997426:config', config: CONFIG }, '*');

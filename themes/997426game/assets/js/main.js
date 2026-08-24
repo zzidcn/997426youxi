@@ -23,11 +23,56 @@
       });
     }
 
-    // 2. 响应 iframe 内游戏的配置请求（跨域降级）
+    // 2. 响应 iframe 内游戏的配置请求 + API 代理（v2 核心机制）
     window.addEventListener('message', function (e) {
       if (e.data && e.data.type === 'game997426:request-config' && window.Game997426Config) {
         e.source.postMessage({ type: 'game997426:config', config: window.Game997426Config }, '*');
       }
+
+      // ── API 代理：父页面带登录态转发 REST 请求 ──
+      if (e.data && e.data.type === 'game997426:proxy' && window.Game997426Config) {
+        var cfg = window.Game997426Config;
+        var action = e.data.action, payload = e.data.payload || {};
+        var path, opts;
+        if (action === 'me') {
+          path = cfg.restUrl + '/me';
+          opts = { method: 'GET', credentials: 'include' };
+        } else if (action === 'leaderboard') {
+          path = cfg.restUrl + '/leaderboard?game_id=' + encodeURIComponent(payload.game_id) +
+            '&limit=' + encodeURIComponent(payload.limit || 10) +
+            '&period=' + encodeURIComponent(payload.period || 'all');
+          opts = { method: 'GET', credentials: 'include' };
+        } else { // submit
+          path = cfg.restUrl + '/score';
+          opts = {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.nonce },
+            body: JSON.stringify(payload),
+          };
+        }
+        fetch(path, opts)
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            e.source.postMessage({
+              type: 'game997426:proxy-result',
+              msgId: e.data.msgId,
+              ok: !(data && data.code),       // WP 错误响应带 code 字段
+              data: data,
+              error: data && data.message ? data.message : '',
+            }, '*');
+          })
+          .catch(function (err) {
+            e.source.postMessage({
+              type: 'game997426:proxy-result',
+              msgId: e.data.msgId,
+              ok: false,
+              error: String(err),
+            }, '*');
+          });
+        return;
+      }
+
       if (e.data && e.data.type === 'game997426:score-result') {
         var r = e.data.result;
         if (r && r.ok) {
