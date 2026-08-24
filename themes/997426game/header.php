@@ -34,7 +34,12 @@
 		<div class="g99-user">
 			<?php if ( is_user_logged_in() ) : ?>
 				<span class="g99-user-name">👤 <?php echo esc_html( wp_get_current_user()->display_name ); ?></span>
-				<span class="g99-user-points">💎 <?php echo number_format_i18n( GAME997426_Points::get( get_current_user_id() ) ); ?></span>
+				<?php
+				// 积分显示依赖游戏核心插件；未启用时优雅跳过（v2 架构下该插件已废弃）。
+				if ( class_exists( 'GAME997426_Points' ) ) {
+					echo '<span class="g99-user-points">💎 ' . esc_html( number_format_i18n( GAME997426_Points::get( get_current_user_id() ) ) ) . '</span>';
+				}
+				?>
 				<a class="g99-user-link" href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">退出</a>
 			<?php else : ?>
 				<a class="g99-user-link g99-login" href="<?php echo esc_url( wp_login_url( home_url( '/' ) ) ); ?>">登录</a>

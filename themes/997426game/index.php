@@ -51,27 +51,39 @@ $plugin_active = class_exists( 'GAME997426_Leaderboard' ) && shortcode_exists( '
 	<?php else : ?>
 		<section>
 			<h2 class="g99-section-title">热门游戏</h2>
-			<?php echo do_shortcode( '[games_grid limit="12"]' ); ?>
+			<?php
+			if ( shortcode_exists( 'games_grid' ) ) {
+				echo do_shortcode( '[games_grid limit="12"]' );
+			} else {
+				echo '<p class="g99-muted">安装游戏插件后，这里会展示游戏列表。已装游戏可直接访问其页面（如 /game-snake/）。</p>';
+			}
+			?>
 		</section>
 
 		<section>
 			<h2 class="g99-section-title">🏆 全站玩家荣誉榜</h2>
 			<?php
-			$top = GAME997426_Leaderboard::site_top_players( 10 );
-			if ( $top ) :
-				?>
-				<ol class="g99-lb-list g99-site-lb">
-					<?php foreach ( $top as $i => $row ) : ?>
-						<li class="g99-lb-row <?php echo $i < 3 ? 'g99-top' . ( (int) $i + 1 ) : ''; ?>">
-							<span class="g99-lb-rank"><?php echo (int) $i + 1; ?></span>
-							<span class="g99-lb-name"><?php echo esc_html( $row->user_name ); ?></span>
-							<span class="g99-lb-score">💎 <?php echo number_format_i18n( (int) $row->total_score ); ?> · <?php echo (int) $row->games_played; ?> 款游戏</span>
-						</li>
-					<?php endforeach; ?>
-				</ol>
-			<?php else : ?>
-				<p class="g99-muted">暂无数据，玩一局就能上榜！</p>
-			<?php endif; ?>
+			// 依赖游戏核心插件；未启用时显示占位（v2 架构下各游戏自带榜单）。
+			if ( class_exists( 'GAME997426_Leaderboard' ) ) {
+				$top = GAME997426_Leaderboard::site_top_players( 10 );
+				if ( $top ) :
+					?>
+					<ol class="g99-lb-list g99-site-lb">
+						<?php foreach ( $top as $i => $row ) : ?>
+							<li class="g99-lb-row <?php echo $i < 3 ? 'g99-top' . ( (int) $i + 1 ) : ''; ?>">
+								<span class="g99-lb-rank"><?php echo (int) $i + 1; ?></span>
+								<span class="g99-lb-name"><?php echo esc_html( $row->user_name ); ?></span>
+								<span class="g99-lb-score">💎 <?php echo number_format_i18n( (int) $row->total_score ); ?> · <?php echo (int) $row->games_played; ?> 款游戏</span>
+							</li>
+						<?php endforeach; ?>
+					</ol>
+				<?php else : ?>
+					<p class="g99-muted">暂无数据，玩一局就能上榜！</p>
+				<?php endif;
+			} else {
+				echo '<p class="g99-muted">各游戏排行榜请见对应游戏页面。</p>';
+			}
+			?>
 		</section>
 	<?php endif; ?>
 </div>
