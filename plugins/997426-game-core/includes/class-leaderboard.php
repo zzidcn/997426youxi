@@ -81,7 +81,7 @@ class GAME997426_Leaderboard {
 		);
 	}
 
-	/** 指定游戏的排行榜。 */
+	/** 指定游戏的排行榜（每用户/游客取最高分）。 */
 	public static function top( $game_id, $limit = 10, $period = 'all' ) {
 		global $wpdb;
 		$table  = self::table();
@@ -99,13 +99,17 @@ class GAME997426_Leaderboard {
 			$params[] = gmdate( 'Y-m-d H:i:s', strtotime( '-1 month' ) );
 		}
 
-		// 每个用户只取最高分。
-		$sql     = "SELECT t.user_id, t.user_name, MAX(t.score) AS score
-			FROM {$table} t
-			JOIN ( SELECT COALESCE(NULLIF(user_id,0), -id) AS uid_key, game_id FROM {$table} WHERE game_id = %d GROUP BY uid_key ) k
-			  ON k.game_id = t.game_id AND COALESCE(NULLIF(t.user_id,0), -t.id) = k.uid_key
-			{$where}
-			GROUP BY COALESCE(NULLIF(t.user_id,0), -t.id), t.user_name
+		// 每个用户（登录）或游客（按单条成绩 id）只取最高分。
+		// 兼容 ONLY_FULL_GROUP_BY：内层聚合去重，外层仅排序。
+		$sql = "SELECT uid_key, user_id, user_name, score FROM (
+				SELECT COALESCE(NULLIF(user_id,0), -id) AS uid_key,
+				       MAX(user_id) AS user_id,
+				       MAX(user_name) AS user_name,
+				       MAX(score) AS score
+				FROM {$table}
+				{$where}
+				GROUP BY uid_key
+			) agg
 			ORDER BY score DESC
 			LIMIT %d";
 		array_unshift( $params, (int) $game_id );
