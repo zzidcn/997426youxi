@@ -2,7 +2,7 @@
 /**
  * Plugin Name: 997426 游戏 - 贪吃蛇
  * Description: 贪吃蛇小游戏独立插件。启用后自动创建并发布游戏页面，无需手写短代码。每款游戏独立数据表与排行榜。
- * Version:     1.4.0
+ * Version:     1.4.1
  * Author:      997426
  * License:     GPL-2.0-or-later
  * Requires at least: 6.0
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GAME_SNAKE_VER', '1.4.0' );
+define( 'GAME_SNAKE_VER', '1.4.1' );
 
 /* 页面 slug 与标题（自动建页用） */
 define( 'GAME_SNAKE_PAGE_SLUG', 'game-snake' );

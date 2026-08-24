@@ -195,6 +195,14 @@
   },{passive:false});
 
 
+  /* ── 虚拟方向键（触屏检测：多信号任一命中即显示） ── */
+  var isTouch = ('ontouchstart' in window)
+    || (navigator.maxTouchPoints > 0)
+    || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  if (isTouch) {
+    var dpad = document.getElementById('gsnake-dpad');
+    if (dpad) dpad.classList.add('gsnake-touch');
+  }
   /* ── 虚拟方向键（触屏） ── */
   var DIRMAP = { up:{x:0,y:-1}, down:{x:0,y:1}, left:{x:-1,y:0}, right:{x:1,y:0} };
   root.querySelectorAll('.gsnake-dbtn[data-dir]').forEach(function (btn) {

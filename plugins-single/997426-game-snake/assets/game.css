@@ -92,13 +92,15 @@ li:first-child .gsnake-lb-rank { background: #ffd166; color: #000; }
 li:nth-child(2) .gsnake-lb-rank { background: #c0c0c0; color: #000; }
 li:nth-child(3) .gsnake-lb-rank { background: #cd7f32; color: #000; }
 
-/* 手机虚拟方向键：仅触屏设备显示 */
+/* 手机虚拟方向键：默认隐藏，由 JS 检测触屏后加 .gsnake-touch 显示 */
 .gsnake-dpad {
   display: none;
   grid-template-columns: repeat(3, 64px);
   grid-auto-rows: 56px; gap: 8px;
   justify-content: center; margin-top: 14px;
 }
+.gsnake-dpad.gsnake-touch { display: grid; }
+/* 媒体查询兜底：部分环境 JS 检测不到但仍想显示 */
 @media (hover: none) and (pointer: coarse) {
   .gsnake-dpad { display: grid; }
 }
