@@ -2,7 +2,7 @@
 """
 997426小游戏平台 — 一键打包脚本
 将主题、插件、游戏目录分别打包为可直接在 WordPress 后台上传的 zip，
-并在 dist/ 下生成一个整合包。
+并在 dist/ 下生成整合包与纯游戏合集 games.zip。
 
 用法：
     python tools/build.py            # 打包全部
@@ -42,6 +42,23 @@ def make_zip(src: Path, top_dir: str, out_file: Path) -> int:
     return count
 
 
+def make_games_bundle(out_file: Path) -> int:
+    """打包 games/ 全部游戏为 games.zip（内部顶层目录为各游戏 slug）。"""
+    games_dir = ROOT / "games"
+    count = 0
+    with zipfile.ZipFile(out_file, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+        for game in sorted(games_dir.iterdir()):
+            if not game.is_dir():
+                continue
+            for path in sorted(game.rglob("*")):
+                if any(part in EXCLUDE_NAMES for part in path.parts):
+                    continue
+                if path.is_file():
+                    zf.write(path, str(path.relative_to(games_dir)))
+                    count += 1
+    return count
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="997426小游戏平台一键打包")
     parser.add_argument("--clean", action="store_true", help="先清空 dist/ 目录")
@@ -65,10 +82,18 @@ def main() -> int:
         size_kb = out.stat().st_size / 1024
         print(f"[OK] {out_name:<32} {n:>3} 个文件  {size_kb:>8.1f} KB")
 
+    # games.zip：全部游戏合集（解压到站点根即可）
+    bundle = DIST / "games.zip"
+    n = make_games_bundle(bundle)
+    total += n
+    print(f"\n[OK] 游戏合集 games.zip           {n:>3} 个文件  "
+          f"{bundle.stat().st_size / 1024:.1f} KB")
+    print("     内含各游戏目录（snake/、2048/...），解压到站点根即为 /games/<slug>/")
+
     # 整合包：整个仓库内容（不含 .git 与 dist 自身）
-    bundle = DIST / "997426youxi-full.zip"
+    full = DIST / "997426youxi-full.zip"
     n = 0
-    with zipfile.ZipFile(bundle, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+    with zipfile.ZipFile(full, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
         for path in sorted(ROOT.rglob("*")):
             rel = path.relative_to(ROOT)
             if rel.parts[0] in EXCLUDE_NAMES | {".git", "dist", "__pycache__"}:
@@ -77,14 +102,14 @@ def main() -> int:
                 zf.write(path, str(Path("997426youxi") / rel))
                 n += 1
     total += n
-    print(f"\n[OK] 整合包 997426youxi-full.zip  {n} 个文件  "
-          f"{bundle.stat().st_size / 1024:.1f} KB")
+    print(f"[OK] 整合包 997426youxi-full.zip   {n:>3} 个文件  "
+          f"{full.stat().st_size / 1024:.1f} KB")
 
     print(f"\n完成 ✅  共 {total} 个文件。")
     print("WordPress 安装：")
     print("  · 外观→主题→上传 997426game-theme.zip 后启用")
     print("  · 插件→安装插件→上传 997426-game-core-plugin.zip 后激活（自动建表）")
-    print("  · game-*.zip 解压到站点根目录 games/ 下即可游玩")
+    print("  · games.zip 解压到站点根目录 → /games/<slug>/ 即可游玩")
     return 0
 
 
