@@ -115,7 +115,25 @@
   </div>
 </div>
 
-<script src="../../plugins/997426-game-core/assets/js/game997426-sdk.js"></script>
 <script src="game.js"></script>
+<script>
+/**
+ * 兼容 Cloudflare Rocket Loader：若 SDK 未加载（script 被改写 type 延迟），
+ * 动态注入兜底加载，确保 Game997426 对象存在。
+ */
+(function () {
+  function ensureSdk() {
+    if (window.Game997426) return;
+    var s = document.createElement('script');
+    s.src = '../../plugins/997426-game-core/assets/js/game997426-sdk.js';
+    document.body.appendChild(s);
+  }
+  if (document.readyState === 'complete') {
+    setTimeout(ensureSdk, 300);
+  } else {
+    window.addEventListener('load', function () { setTimeout(ensureSdk, 300); });
+  }
+})();
+</script>
 </body>
 </html>
