@@ -209,4 +209,32 @@
     move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 2 : 0) : (dy > 0 ? 3 : 1));
     ts = null;
   }, { passive: true });
+
+  // ── 玩家身份显示：开始界面提示登录状态 ──
+  (function showLoginStatus() {
+    var el = document.getElementById('loginStatus');
+    if (!el) return;
+    function render() {
+      if (!window.Game997426) {
+        el.innerHTML = '⚠️ 无法连接平台（离线模式），成绩不会上报';
+        return;
+      }
+      window.Game997426.getMe().then(function (me) {
+        if (me && me.logged_in) {
+          el.textContent = '👤 当前玩家：' + me.name + '　💎 ' + Number(me.points).toLocaleString() + ' 积分';
+          el.style.color = '#7ee787';
+        } else {
+          el.innerHTML = '<a href="/wp-login.php" target="_top" style="color:#ffd166;">登录</a> 后成绩计入排行榜并获得积分（当前为游客模式）';
+        }
+      }).catch(function () {
+        el.textContent = '(离线模式，成绩不会上报)';
+      });
+    }
+    var tries = 0;
+    var timer = setInterval(function () {
+      tries++;
+      if (window.Game997426 || tries > 20) { clearInterval(timer); }
+      if (window.Game997426 && window.Game997426._cfg) { clearInterval(timer); render(); }
+    }, 300);
+  })();
 })();

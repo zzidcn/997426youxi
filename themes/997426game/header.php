@@ -31,6 +31,18 @@
 			<input type="search" name="s" placeholder="搜索游戏…" value="<?php echo esc_attr( get_search_query() ); ?>">
 			<input type="hidden" name="post_type" value="game">
 		</form>
+		<div class="g99-user">
+			<?php if ( is_user_logged_in() ) : ?>
+				<span class="g99-user-name">👤 <?php echo esc_html( wp_get_current_user()->display_name ); ?></span>
+				<span class="g99-user-points">💎 <?php echo number_format_i18n( GAME997426_Points::get( get_current_user_id() ) ); ?></span>
+				<a class="g99-user-link" href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">退出</a>
+			<?php else : ?>
+				<a class="g99-user-link g99-login" href="<?php echo esc_url( wp_login_url( home_url( '/' ) ) ); ?>">登录</a>
+				<?php if ( get_option( 'users_can_register' ) ) : ?>
+					<a class="g99-user-link g99-register" href="<?php echo esc_url( wp_registration_url() ); ?>">注册</a>
+				<?php endif; ?>
+			<?php endif; ?>
+		</div>
 	</div>
 </header>
 <main class="g99-main">

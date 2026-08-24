@@ -159,3 +159,14 @@ a:hover { filter: brightness(1.15); }
   background: #2b2440; border: 1px solid var(--g99-accent);
   border-radius: var(--g99-radius); padding: 16px 20px; margin: 24px 0;
 }
+
+/* 顶部用户区 */
+.g99-user { display: flex; align-items: center; gap: 10px; font-size: .88rem; }
+.g99-user-name { color: var(--g99-text); font-weight: 600; }
+.g99-user-points { color: var(--g99-gold); }
+.g99-user-link {
+  padding: 6px 14px; border-radius: 999px; background: var(--g99-card);
+  border: 1px solid #2c3370; color: var(--g99-muted);
+}
+.g99-login { color: var(--g99-accent-2); border-color: var(--g99-accent); }
+.g99-register { color: var(--g99-gold); }
