@@ -170,3 +170,31 @@ a:hover { filter: brightness(1.15); }
 }
 .g99-login { color: var(--g99-accent-2); border-color: var(--g99-accent); }
 .g99-register { color: var(--g99-gold); }
+
+/* 首页 Hero 按钮 */
+.g99-hero-btn {
+  display: inline-block; background: linear-gradient(90deg, var(--g99-accent), #9a6bff);
+  color: #fff !important; padding: 12px 34px; border-radius: 999px;
+  font-weight: 800; box-shadow: 0 6px 20px rgba(124,92,255,.4);
+}
+.g99-hero-btn:hover { filter: brightness(1.1); }
+
+/* 积分排行副行 */
+.g99-lb-sub { display: block; color: var(--g99-muted); font-size: .74rem; font-weight: 400; }
+
+/* 挑战卡片 */
+.g99-challenge-card { flex-direction: row; align-items: center; gap: 14px; display: flex; }
+.g99-challenge-icon {
+  width: 56px; height: 56px; flex: none; border-radius: 14px;
+  background: linear-gradient(135deg, #171b35, #2f3670);
+  display: grid; place-items: center; font-size: 1.9rem;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+}
+.g99-challenge-card .g99-card-body { flex: 1; }
+.g99-challenge-btn {
+  display: inline-block; margin-top: 8px;
+  background: rgba(124,92,255,.18); border: 1px solid var(--g99-accent);
+  color: var(--g99-text) !important; padding: 5px 14px; border-radius: 999px;
+  font-size: .78rem; font-weight: 700;
+}
+.g99-card:hover .g99-challenge-btn { background: var(--g99-accent); }
