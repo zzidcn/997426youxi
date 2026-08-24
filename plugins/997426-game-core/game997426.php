@@ -15,11 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GAME997426_VERSION', '1.1.0' );
+define( 'GAME997426_VERSION', '1.2.3' );
 /**
  * 数据库 schema 版本：结构变更时递增，激活/升级时自动迁移。
+ * v2: scores 表新增 ip_hash 列（游客按 IP 聚合）。
  */
-define( 'GAME997426_SCHEMA_VERSION', '1' );
+define( 'GAME997426_SCHEMA_VERSION', '2' );
 
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-game-cpt.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-leaderboard.php';

@@ -29,6 +29,7 @@ class GAME997426_Leaderboard {
 			game_id BIGINT UNSIGNED NOT NULL,
 			user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
 			user_name VARCHAR(60) NOT NULL DEFAULT '',
+			ip_hash VARCHAR(32) NOT NULL DEFAULT '',
 			score BIGINT NOT NULL DEFAULT 0,
 			extra VARCHAR(191) NOT NULL DEFAULT '',
 			created_at DATETIME NOT NULL,
@@ -55,11 +56,14 @@ class GAME997426_Leaderboard {
 		global $wpdb;
 
 		$user_name = '';
+		$ip_hash   = '';
 		if ( $user_id ) {
 			$user      = get_userdata( $user_id );
 			$user_name = $user ? $user->display_name : '';
 		} else {
 			$user_name = __( '游客', 'game997426' );
+			$ip        = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '0.0.0.0';
+			$ip_hash   = md5( $ip . wp_salt( 'auth' ) );
 		}
 
 		$wpdb->insert(
@@ -68,11 +72,12 @@ class GAME997426_Leaderboard {
 				'game_id'    => (int) $game_id,
 				'user_id'    => (int) $user_id,
 				'user_name'  => sanitize_text_field( $user_name ),
+				'ip_hash'    => $ip_hash,
 				'score'      => (int) $score,
 				'extra'      => sanitize_text_field( $extra ),
 				'created_at' => current_time( 'mysql' ),
 			),
-			array( '%d', '%d', '%s', '%d', '%s', '%s' )
+			array( '%d', '%d', '%s', '%s', '%d', '%s', '%s' )
 		);
 
 		return array(
@@ -99,12 +104,12 @@ class GAME997426_Leaderboard {
 			$params[] = gmdate( 'Y-m-d H:i:s', strtotime( '-1 month' ) );
 		}
 
-		// 每个用户（登录）或游客（按单条成绩 id）只取最高分。
-		// 兼容 ONLY_FULL_GROUP_BY：内层聚合去重，外层仅排序。
-		$sql = "SELECT uid_key, user_id, user_name, score FROM (
-				SELECT COALESCE(NULLIF(user_id,0), -id) AS uid_key,
+		// 每个用户/游客取最高分：登录用户按 user_id 聚合；
+		// 游客（user_id=0）按 IP 哈希聚合，同一游客只留最高一条。
+		$sql = "SELECT * FROM (
+				SELECT CASE WHEN user_id > 0 THEN CONCAT('u', user_id) ELSE CONCAT('g', SUBSTRING(ip_hash, 1, 8)) END AS uid_key,
 				       MAX(user_id) AS user_id,
-				       MAX(user_name) AS user_name,
+				       MAX(CASE WHEN user_id > 0 THEN user_name ELSE '游客' END) AS user_name,
 				       MAX(score) AS score
 				FROM {$table}
 				{$where}
