@@ -24,7 +24,7 @@ metadata:
 ## 核心概念
 
 - 每款游戏 = `games/<英文slug>/` 目录，唯一入口 `index.html`，纯静态、零构建、相对路径引用资源。
-- 每发布一篇 WordPress `game` 文章（自定义字段 `game997426_url` 指向 index.html）= 上架一款游戏。
+- 每发布一篇 WordPress `game` 文章（自定义字段 `_game997426_url` 指向 index.html）= 上架一款游戏。
 - 成绩通过统一 REST API 上报 → 自动进全站排行榜与积分荣誉系统。
 
 ## 开发步骤
@@ -52,7 +52,8 @@ metadata:
 1. `python tools/build.py --clean` 打包（新游戏需在 `tools/build.py` 的 TARGETS 里加一行）；
 2. 游戏文件部署到站点 `games/<slug>/`；
 3. WordPress 后台「游戏→上架新游戏」：填标题/介绍/特色图片(800×600)/分类，
-   自定义字段 `game997426_url`=完整URL（可选 `game997426_width/_height`），发布。
+   在「🎮 游戏设置」Metabox 填游戏 URL（字段名 `game997426_url`，**不能带下划线前缀**——
+   WP 后台禁止手工创建 `_` 开头的隐藏字段，会报"抱歉您不能这么做"），发布。
 
 ## 上架前自查
 
