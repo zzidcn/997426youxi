@@ -11,7 +11,7 @@ Theme URI: https://github.com/zzidcn/997426youxi
 Author: 997426
 Author URI: https://github.com/zzidcn
 Description: 997426小游戏平台主题 —— 响应式游戏门户，含游戏列表、分类、单页游戏播放器（自适应全屏）、排行榜与积分荣誉展示。配合 997426 游戏核心插件使用。
-Version: 2.3.0
+Version: 2.3.1
 Requires at least: 6.0
 Requires PHP: 7.4
 License: GPL-2.0-or-later
@@ -50,13 +50,13 @@ function theme997426_assets() {
 		'theme997426',
 		get_stylesheet_directory_uri() . '/assets/css/main.css',
 		array(),
-		'2.3.0'
+		'2.3.1'
 	);
 	wp_enqueue_script(
 		'theme997426',
 		get_stylesheet_directory_uri() . '/assets/js/main.js',
 		array(),
-		'2.3.0',
+		'2.3.1',
 		true
 	);
 

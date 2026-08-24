@@ -213,12 +213,16 @@ a:hover { filter: brightness(1.15); }
   gap: 10px; padding: 22px 16px 20px;
 }
 .g99-challenge-icon {
-  width: 64px; height: 64px; flex: none; border-radius: 16px;
+  width: 64px; height: 64px; border-radius: 16px;
+  margin: 0 auto;                          /* 图标容器水平居中 */
   background: linear-gradient(135deg, #171b35, #2f3670);
-  display: grid; place-items: center; font-size: 2.2rem;
+  display: grid !important; place-items: center; font-size: 2.2rem;
+  line-height: 1;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
 }
-.g99-challenge-card .g99-card-body { flex: none; }
+.g99-challenge-icon span,
+.g99-challenge-icon::before { justify-self: center; align-self: center; }
+.g99-challenge-card .g99-card-body { flex: none; width: 100%; }
 .g99-challenge-btn {
   display: inline-block; margin-top: 10px;
   background: rgba(124,92,255,.18); border: 1px solid var(--g99-accent);
