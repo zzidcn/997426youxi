@@ -1,19 +1,59 @@
 /**
- * 2048 — 997426 示例游戏 2
- * 键盘(方向键/WASD) + 触屏滑动，DOM 渲染自适应。
- * 通过 Game997426 SDK 上报成绩到统一排行榜。
+ * 2048 — 997426 标准示例游戏 v2
+ * 四要素：①开始游戏 ②结束游戏(成绩上报) ③全屏按钮 ④游戏介绍
+ * 键盘(方向键/WASD) + 触屏滑动，DOM 自适应。
  */
 (function () {
   'use strict';
 
   var gridEl = document.getElementById('grid');
-  var overlay = document.getElementById('overlay');
+  var startOverlay = document.getElementById('startOverlay');
+  var overOverlay  = document.getElementById('overOverlay');
+  var infoModal    = document.getElementById('infoModal');
   var startBtn = document.getElementById('startBtn');
-  var scoreEl = document.getElementById('score');
-  var bestEl = document.getElementById('best');
+  var retryBtn = document.getElementById('retryBtn');
+  var infoBtn  = document.getElementById('infoBtn');
+  var infoClose= document.getElementById('infoClose');
+  var fsBtn    = document.getElementById('fsBtn');
+  var scoreEl  = document.getElementById('score');
+  var bestEl   = document.getElementById('best');
+  var finalScoreEl = document.getElementById('finalScore');
+  var scoreResultEl= document.getElementById('scoreResult');
 
-  var N = 4, board, score, running = false, best = 0;
+  var N = 4, board, score, best = 0, running = false;
 
+  // ── ③ 全屏按钮 ──
+  fsBtn.addEventListener('click', function () {
+    var wrap = document.getElementById('wrap');
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      (wrap.requestFullscreen || wrap.webkitRequestFullscreen).call(wrap);
+    } else {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    }
+  });
+  function syncFsIcon() {
+    fsBtn.textContent =
+      (document.fullscreenElement || document.webkitFullscreenElement) ? '🗗' : '⛶';
+  }
+  document.addEventListener('fullscreenchange', syncFsIcon);
+  document.addEventListener('webkitfullscreenchange', syncFsIcon);
+
+  // ── ④ 游戏介绍（打开时暂停） ──
+  var pausedByInfo = false;
+  infoBtn.addEventListener('click', function () {
+    if (running) { running = false; pausedByInfo = true; }
+    infoModal.classList.remove('hidden');
+  });
+  function closeInfo() {
+    infoModal.classList.add('hidden');
+    if (pausedByInfo) { running = true; pausedByInfo = false; }
+  }
+  infoClose.addEventListener('click', closeInfo);
+  document.addEventListener('keydown', function (e) {
+    if (e.code === 'Escape' && !infoModal.classList.contains('hidden')) closeInfo();
+  });
+
+  // ── 游戏逻辑 ──
   function emptyBoard() {
     return Array.from({ length: N }, function () { return new Array(N).fill(0); });
   }
@@ -56,13 +96,14 @@
     return arr;
   }
 
-  function rotate(b) { // 顺时针旋转
+  function rotate(b) {
     return b[0].map(function (_, c) {
       return b.map(function (row) { return row[c]; }).reverse();
     });
   }
 
   function move(dirIdx) { // 0左 1上 2右 3下
+    if (!running) return;
     var b = board.map(function (r) { return r.slice(); });
     for (var i = 0; i < dirIdx; i++) b = rotate(b);
     var moved = false;
@@ -91,42 +132,54 @@
     return true;
   }
 
+  // ── ② 结束游戏：成绩上报 ──
   async function end() {
     running = false;
-    var resultText = '';
+    finalScoreEl.textContent = score;
+    scoreResultEl.textContent = '成绩上报中…';
+    overOverlay.classList.remove('hidden');
+
     try {
       var sdk = await Game997426.ready();
       var res = await sdk.submitScore(score);
       if (res && res.ok) {
-        resultText = '排名 #' + res.rank +
-          (res.points_awarded ? ' · +' + res.points_awarded + ' 积分 💎' : '');
+        var parts = [];
+        parts.push(res.rank <= 100 ? '当前排名 #' + res.rank : '已计入排行');
+        if (res.points_awarded) parts.push('+' + res.points_awarded + ' 积分 💎');
+        scoreResultEl.textContent = parts.join(' · ');
+      } else {
+        scoreResultEl.textContent = '';
       }
-    } catch (e) { /* 平台外运行忽略 */ }
-
-    document.querySelector('#overlay h1').textContent = '游戏结束 · ' + score + ' 分';
-    document.querySelector('#overlay p').innerHTML =
-      (resultText ? resultText + '<br>' : '') + '电脑：方向键 / WASD<br>手机：滑动屏幕合并数字';
-    startBtn.textContent = '再来一局';
-    overlay.classList.remove('hidden');
+    } catch (e) {
+      scoreResultEl.textContent = '(离线模式，成绩未上报)';
+    }
   }
 
+  // ── ① 开始游戏 ──
   function start() {
     board = emptyBoard();
     score = 0;
     addRandom();
     addRandom();
     render();
-    overlay.classList.add('hidden');
+    startOverlay.classList.add('hidden');
+    overOverlay.classList.add('hidden');
     running = true;
   }
+  startBtn.addEventListener('click', start);
+  retryBtn.addEventListener('click', start);
 
-  // ── 键盘 ──────────────────────────────
+  // ── 键盘 ──
   var KEYMAP = {
     ArrowLeft: 0, KeyA: 0, ArrowUp: 1, KeyW: 1,
     ArrowRight: 2, KeyD: 2, ArrowDown: 3, KeyS: 3,
   };
   document.addEventListener('keydown', function (e) {
-    if (!running) return;
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (!running && infoModal.classList.contains('hidden')) start();
+      return;
+    }
     var d = KEYMAP[e.code];
     if (d !== undefined) {
       e.preventDefault();
@@ -134,7 +187,7 @@
     }
   });
 
-  // ── 触屏滑动 ───────────────────────────
+  // ── 触屏滑动 ──
   var ts = null;
   var stage = document.getElementById('stage');
   stage.addEventListener('touchstart', function (e) {
@@ -148,6 +201,4 @@
     move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 2 : 0) : (dy > 0 ? 3 : 1));
     ts = null;
   }, { passive: true });
-
-  startBtn.addEventListener('click', start);
 })();

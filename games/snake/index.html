@@ -9,34 +9,100 @@
   html,body { height:100%; background:#101326; color:#e8eaf6;
     font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
     overflow:hidden; touch-action:none; -webkit-user-select:none; user-select:none; }
-  #wrap { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; }
-  #hud { display:flex; gap:24px; font-weight:700; font-size:clamp(.9rem,2.5vw,1.1rem); }
-  #stage { width:min(96vw, 96vh - 60px, 560px); aspect-ratio:1; background:#171b35;
+  :root { --accent:#7c5cff; --accent2:#00d4ff; }
+  #wrap { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:8px; }
+
+  /* ── HUD：分数区 + 功能按钮区 ── */
+  #hud { display:flex; justify-content:space-between; align-items:center;
+    width:min(96vw, 92vh - 70px, 560px); font-weight:700; font-size:clamp(.85rem,2.5vw,1.05rem); }
+  #hud .scores { display:flex; gap:18px; }
+  #hud .btns { display:flex; gap:8px; }
+  .iconbtn { background:#1d2242; border:1px solid #2c3370; color:#e8eaf6;
+    min-width:44px; min-height:44px; border-radius:10px; cursor:pointer; font-size:1.15rem;
+    display:grid; place-items:center; transition:background .15s; }
+  .iconbtn:hover, .iconbtn:active { background:var(--accent); }
+
+  #stage { width:min(96vw, 92vh - 70px, 560px); aspect-ratio:1; background:#171b35;
     border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.4); position:relative; }
   canvas { display:block; width:100%; height:100%; border-radius:12px; }
-  #overlay { position:absolute; inset:0; display:grid; place-items:center;
-    background:rgba(16,19,38,.85); border-radius:12px; text-align:center; padding:20px; }
-  #overlay h1 { font-size:clamp(1.3rem,4vw,2rem); margin-bottom:10px; }
-  #overlay p { color:#9aa1c9; margin-bottom:18px; font-size:.9rem; }
-  button { background:#7c5cff; border:none; color:#fff; padding:12px 32px;
-    font-size:1rem; border-radius:999px; cursor:pointer; font-weight:700; }
-  button:active { transform:scale(.96); }
+
+  /* ── 遮罩层：开始 / 结束 共用样式 ── */
+  .overlay { position:absolute; inset:0; display:grid; place-items:center;
+    background:rgba(16,19,38,.9); border-radius:12px; text-align:center; padding:20px; z-index:10; }
+  .overlay h1 { font-size:clamp(1.3rem,4vw,2rem); margin-bottom:12px; }
+  .overlay .intro { color:#b9bfe4; font-size:.9rem; line-height:1.8; margin-bottom:18px; }
+  .bigbtn { background:linear-gradient(90deg,var(--accent),#9a6bff); border:none; color:#fff;
+    padding:14px 40px; font-size:1.05rem; border-radius:999px; cursor:pointer; font-weight:800;
+    min-height:48px; box-shadow:0 6px 20px rgba(124,92,255,.4); }
+  .bigbtn:active { transform:scale(.96); }
   .hidden { display:none !important; }
+
+  /* 结束层成绩展示 */
+  #finalScore { color:var(--accent2); font-size:clamp(1.6rem,6vw,2.4rem); font-weight:900; margin-bottom:6px; }
+  #scoreResult { color:#ffd166; font-size:.9rem; margin-bottom:16px; min-height:1.4em; }
+
+  /* ── 游戏介绍弹窗 ── */
+  #infoModal { position:absolute; inset:0; display:grid; place-items:center;
+    background:rgba(10,12,28,.95); border-radius:12px; z-index:20; padding:16px; }
+  #infoModal .card { max-width:420px; width:100%; background:#1d2242; border:1px solid #2c3370;
+    border-radius:14px; padding:22px; text-align:left; max-height:100%; overflow:auto; }
+  #infoModal h2 { font-size:1.1rem; margin-bottom:10px; }
+  #infoModal ul { list-style:none; color:#c3c8ea; font-size:.88rem; line-height:2; }
+  #infoModal li b { color:var(--accent2); }
+  #infoModal .closeRow { text-align:center; margin-top:14px; }
 </style>
 </head>
 <body>
 <div id="wrap">
   <div id="hud">
-    <span>得分 <span id="score">0</span></span>
-    <span>最高 <span id="best">0</span></span>
+    <div class="scores">
+      <span>得分 <span id="score">0</span></span>
+      <span>最高 <span id="best">0</span></span>
+    </div>
+    <div class="btns">
+      <button class="iconbtn" id="infoBtn" title="游戏介绍" aria-label="游戏介绍">❓</button>
+      <button class="iconbtn" id="fsBtn" title="全屏" aria-label="全屏">⛶</button>
+    </div>
   </div>
+
   <div id="stage">
     <canvas id="cv"></canvas>
-    <div id="overlay">
+
+    <!-- ① 开始游戏 -->
+    <div id="startOverlay" class="overlay">
       <div>
         <h1>🐍 贪吃蛇</h1>
-        <p>电脑：方向键 / WASD<br>手机：滑动屏幕控制方向</p>
-        <button id="startBtn">开始游戏</button>
+        <p class="intro">
+          吃果实变长变快，撞墙或撞到自己即结束。<br>
+          💻 电脑：方向键 / WASD　📱 手机：滑动屏幕
+        </p>
+        <button id="startBtn" class="bigbtn">▶ 开始游戏</button>
+      </div>
+    </div>
+
+    <!-- ② 结束游戏 -->
+    <div id="overOverlay" class="overlay hidden">
+      <div>
+        <h1>游戏结束</h1>
+        <div id="finalScore">0</div>
+        <p id="scoreResult"></p>
+        <button id="retryBtn" class="bigbtn">🔄 再来一局</button>
+      </div>
+    </div>
+
+    <!-- ④ 游戏介绍 -->
+    <div id="infoModal" class="hidden">
+      <div class="card">
+        <h2>🎮 游戏介绍</h2>
+        <ul>
+          <li><b>目标：</b>控制小蛇吃掉红色果实，每颗 +10 分。</li>
+          <li><b>加速：</b>每吃一颗，移动速度略微提升。</li>
+          <li><b>失败：</b>撞到墙壁或自己的身体即结束。</li>
+          <li><b>电脑操作：</b>方向键或 WASD 转向，空格开始。</li>
+          <li><b>手机操作：</b>向上下左右滑动屏幕转向。</li>
+          <li><b>积分：</b>创造个人纪录可兑换平台积分 💎 并计入排行榜。</li>
+        </ul>
+        <div class="closeRow"><button id="infoClose" class="bigbtn" style="padding:10px 32px;">知道了</button></div>
       </div>
     </div>
   </div>

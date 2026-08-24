@@ -1,21 +1,70 @@
 /**
- * 贪吃蛇 — 997426 示例游戏 1
+ * 贪吃蛇 — 997426 标准示例游戏 v2
+ * 四要素：①开始游戏 ②结束游戏(成绩上报) ③全屏按钮 ④游戏介绍
  * 键盘(方向键/WASD) + 触屏滑动，画布自适应。
- * 通过 Game997426 SDK 上报成绩到统一排行榜。
  */
 (function () {
   'use strict';
 
   var cv = document.getElementById('cv');
   var ctx = cv.getContext('2d');
-  var GRID = 20;                 // 20x20 格
-  var overlay = document.getElementById('overlay');
+  var GRID = 20;
+
+  // ── DOM 引用 ──
+  var startOverlay = document.getElementById('startOverlay');
+  var overOverlay  = document.getElementById('overOverlay');
+  var infoModal    = document.getElementById('infoModal');
   var startBtn = document.getElementById('startBtn');
-  var scoreEl = document.getElementById('score');
-  var bestEl = document.getElementById('best');
+  var retryBtn = document.getElementById('retryBtn');
+  var infoBtn  = document.getElementById('infoBtn');
+  var infoClose= document.getElementById('infoClose');
+  var fsBtn    = document.getElementById('fsBtn');
+  var scoreEl  = document.getElementById('score');
+  var bestEl   = document.getElementById('best');
+  var finalScoreEl = document.getElementById('finalScore');
+  var scoreResultEl= document.getElementById('scoreResult');
 
-  var cell, snake, dir, nextDir, food, score, running, timer, speed;
+  var cell, snake, dir, nextDir, food, score, best = 0, running = false, timer, speed;
 
+  // ── ③ 全屏按钮 ──
+  fsBtn.addEventListener('click', function () {
+    var stage = document.getElementById('wrap');
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      (stage.requestFullscreen || stage.webkitRequestFullscreen).call(stage);
+    } else {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    }
+  });
+
+  function syncFsIcon() {
+    var fs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    fsBtn.textContent = fs ? '🗗' : '⛶';
+  }
+  document.addEventListener('fullscreenchange', syncFsIcon);
+  document.addEventListener('webkitfullscreenchange', syncFsIcon);
+
+  // ── ④ 游戏介绍 ──
+  infoBtn.addEventListener('click', function () {
+    if (running) pause();
+    infoModal.classList.remove('hidden');
+  });
+  infoClose.addEventListener('click', function () {
+    infoModal.classList.add('hidden');
+    resume();
+  });
+  // ESC 关闭介绍
+  document.addEventListener('keydown', function (e) {
+    if (e.code === 'Escape' && !infoModal.classList.contains('hidden')) {
+      infoModal.classList.add('hidden');
+      resume();
+    }
+  });
+
+  // ── 暂停/恢复（看介绍时暂停） ──
+  function pause() { if (running) { clearInterval(timer); timer = null; } }
+  function resume() { if (running && !timer) timer = setInterval(step, speed); }
+
+  // ── 游戏逻辑 ──
   function resize() {
     var size = cv.clientWidth;
     cv.width = size * devicePixelRatio;
@@ -24,6 +73,7 @@
     draw();
   }
   window.addEventListener('resize', resize);
+  document.addEventListener('fullscreenchange', resize);
 
   function reset() {
     snake = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
@@ -31,8 +81,9 @@
     nextDir = dir;
     food = spawnFood();
     score = 0;
-    speed = 140; // ms/步
+    speed = 140;
     updateHud();
+    draw();
   }
 
   function spawnFood() {
@@ -47,7 +98,6 @@
     dir = nextDir;
     var head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
 
-    // 撞墙或撞自己 → 结束
     if (head.x < 0 || head.y < 0 || head.x >= GRID || head.y >= GRID ||
         snake.some(function (s) { return s.x === head.x && s.y === head.y; })) {
       return gameOver();
@@ -57,7 +107,7 @@
     if (head.x === food.x && head.y === food.y) {
       score += 10;
       food = spawnFood();
-      speed = Math.max(60, speed - 3); // 加速
+      speed = Math.max(60, speed - 3);
       clearInterval(timer);
       timer = setInterval(step, speed);
       updateHud();
@@ -68,22 +118,20 @@
   }
 
   function draw() {
-    if (!snake) return;
-    var w = cv.width;
-    ctx.clearRect(0, 0, w, w);
-    // 网格底纹
+    if (!snake || !cell) return;
+    ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.fillStyle = 'rgba(255,255,255,.03)';
     for (var i = 0; i < GRID; i++) {
       for (var j = 0; j < GRID; j++) {
         if ((i + j) % 2 === 0) ctx.fillRect(i * cell, j * cell, cell, cell);
       }
     }
-    // 食物
-    ctx.fillStyle = '#ff5c7a';
-    ctx.beginPath();
-    ctx.arc((food.x + .5) * cell, (food.y + .5) * cell, cell * .38, 0, Math.PI * 2);
-    ctx.fill();
-    // 蛇
+    if (food) {
+      ctx.fillStyle = '#ff5c7a';
+      ctx.beginPath();
+      ctx.arc((food.x + .5) * cell, (food.y + .5) * cell, cell * .38, 0, Math.PI * 2);
+      ctx.fill();
+    }
     snake.forEach(function (s, i) {
       ctx.fillStyle = i === 0 ? '#00d4ff' : '#7c5cff';
       var pad = i === 0 ? 1 : 2;
@@ -103,39 +151,52 @@
   }
 
   function updateHud() {
+    best = Math.max(best, score);
     scoreEl.textContent = score;
-    bestEl.textContent = Math.max(score, parseInt(bestEl.textContent, 10) || 0);
+    bestEl.textContent = best;
   }
 
+  // ── ① 开始游戏 ──
   function start() {
     reset();
-    overlay.classList.add('hidden');
+    startOverlay.classList.add('hidden');
+    overOverlay.classList.add('hidden');
     running = true;
     timer = setInterval(step, speed);
   }
+  startBtn.addEventListener('click', start);
+  retryBtn.addEventListener('click', start);
 
+  // ── ② 结束游戏：展示成绩 + 上报排行榜 ──
   async function gameOver() {
     running = false;
     clearInterval(timer);
+    timer = null;
     draw();
 
-    var resultText = '';
+    finalScoreEl.textContent = score;
+    scoreResultEl.textContent = '成绩上报中…';
+
     try {
       var sdk = await Game997426.ready();
       var res = await sdk.submitScore(score);
       if (res && res.ok) {
-        resultText = '排名 #' + res.rank +
-          (res.points_awarded ? ' · +' + res.points_awarded + ' 积分 💎' : '');
+        var parts = [];
+        parts.push(res.rank <= 100 ? '当前排名 #' + res.rank : '已计入排行');
+        if (res.points_awarded) parts.push('+' + res.points_awarded + ' 积分 💎');
+        scoreResultEl.textContent = parts.join(' · ');
+      } else {
+        scoreResultEl.textContent = '';
       }
-    } catch (e) { /* 平台外运行（本地调试）时忽略 */ }
+    } catch (e) {
+      // 平台外本地调试：静默跳过上报。
+      scoreResultEl.textContent = '(离线模式，成绩未上报)';
+    }
 
-    document.querySelector('#overlay h1').textContent = '游戏结束 · ' + score + ' 分';
-    document.querySelector('#overlay p').innerHTML = resultText ? resultText + '<br>电脑：方向键 / WASD<br>手机：滑动屏幕控制方向' : '电脑：方向键 / WASD<br>手机：滑动屏幕控制方向';
-    startBtn.textContent = '再来一局';
-    overlay.classList.remove('hidden');
+    overOverlay.classList.remove('hidden');
   }
 
-  // ── 输入：键盘 ─────────────────────────
+  // ── 输入：键盘 ──
   var KEYMAP = {
     ArrowUp: { x: 0, y: -1 }, KeyW: { x: 0, y: -1 },
     ArrowDown: { x: 0, y: 1 }, KeyS: { x: 0, y: 1 },
@@ -143,26 +204,29 @@
     ArrowRight: { x: 1, y: 0 }, KeyD: { x: 1, y: 0 },
   };
   document.addEventListener('keydown', function (e) {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (!running && overOverlay.classList.contains('hidden')) start();
+      return;
+    }
     var d = KEYMAP[e.code];
     if (d) {
       e.preventDefault();
       setDir(d);
     }
-    if (e.code === 'Space' && !running) start();
   });
 
   function setDir(d) {
-    // 禁止 180° 掉头
     if (running && d.x !== -dir.x && d.y !== -dir.y) nextDir = d;
   }
 
-  // ── 输入：触屏滑动 ─────────────────────
+  // ── 输入：触屏滑动 ──
   var touchStart = null;
   document.addEventListener('touchstart', function (e) {
     touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   }, { passive: true });
   document.addEventListener('touchmove', function (e) {
-    e.preventDefault(); // 阻止页面滚动
+    e.preventDefault();
     if (!touchStart || !running) return;
     var dx = e.touches[0].clientX - touchStart.x;
     var dy = e.touches[0].clientY - touchStart.y;
@@ -173,7 +237,7 @@
     touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   }, { passive: false });
 
-  startBtn.addEventListener('click', start);
+  // ── 初始化 ──
   resize();
   reset();
 })();

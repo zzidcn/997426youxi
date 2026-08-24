@@ -39,6 +39,7 @@ metadata:
    ```
 3. **自适应**：Canvas 类监听 resize 按 `clientWidth × devicePixelRatio` 重设物理像素；DOM 类用 `min(96vw, 96vh - HUD)` + `aspect-ratio`。禁止横向滚动条、禁止固定窗口尺寸假设。
 4. **双输入**：键盘（方向键/WASD + 空格开始）和触屏（滑动/点按；容器 `touch-action:none`，touchmove 里 `preventDefault()` 防滚动）。开始界面写明两种操作方式。
+4b. **界面四要素（v2 强制）**：①开始游戏遮罩+「▶开始」按钮 ②结束成绩展示(排名/积分)+「🔄再来一局」 ③HUD常驻⛶全屏按钮(≥44px,fullscreenchange换图标) ④❓介绍弹窗(打开时暂停游戏)。参考 `games/snake/` v2 实现复制即可。
 5. **SDK 接入**（游戏结束时调用，一局仅一次）：
    ```js
    const sdk = await Game997426.ready();
