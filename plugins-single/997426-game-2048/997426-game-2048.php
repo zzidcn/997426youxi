@@ -2,7 +2,7 @@
 /**
  * Plugin Name: 997426 游戏 - 2048
  * Description: 2048 小游戏独立插件。启用后自动创建并发布游戏页面，自动接入游戏大厅与全站积分排行。
- * Version:     1.1.0
+ * Version:     1.2.0
  * Author:      997426
  * License:     GPL-2.0-or-later
  * Requires at least: 6.0
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GAME_2048_VER', '1.1.0' );
+define( 'GAME_2048_VER', '1.2.0' );
 define( 'GAME_2048_PAGE_SLUG', 'game-2048' );
 define( 'GAME_2048_PAGE_TITLE', '🔢 2048' );
 
@@ -131,7 +131,8 @@ add_action( 'admin_notices', 'game_2048_admin_notice' );
  * ============================================================ */
 function game_2048_assets() {
 	wp_register_style( 'game-2048', plugins_url( 'assets/game.css', __FILE__ ), array(), GAME_2048_VER );
-	wp_register_script( 'game-2048', plugins_url( 'assets/game.js', __FILE__ ), array(), GAME_2048_VER, true );
+	wp_register_script( 'game-2048-sfx', plugins_url( 'assets/sfx.js', __FILE__ ), array(), GAME_2048_VER, true );
+	wp_register_script( 'game-2048', plugins_url( 'assets/game.js', __FILE__ ), array( 'game-2048-sfx' ), GAME_2048_VER, true );
 
 	wp_localize_script(
 		'game-2048',
@@ -163,6 +164,7 @@ function game_2048_shortcode( $atts ) {
 			</div>
 			<div class="g2048-btns">
 				<button type="button" class="g2048-iconbtn" id="g2048-info" title="游戏介绍">❓</button>
+				<button type="button" class="g2048-iconbtn" id="g2048-sfx" title="音效开关" aria-label="音效开关">🔊</button>
 				<button type="button" class="g2048-iconbtn" id="g2048-fs" title="全屏">⛶</button>
 				<button type="button" class="g2048-iconbtn" id="g2048-quit" title="结束游戏" style="display:none;">⏹</button>
 			</div>

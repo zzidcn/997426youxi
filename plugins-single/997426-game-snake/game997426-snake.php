@@ -2,7 +2,7 @@
 /**
  * Plugin Name: 997426 游戏 - 贪吃蛇
  * Description: 贪吃蛇小游戏独立插件。启用后自动创建并发布游戏页面，无需手写短代码。每款游戏独立数据表与排行榜。
- * Version:     1.2.0
+ * Version:     1.3.0
  * Author:      997426
  * License:     GPL-2.0-or-later
  * Requires at least: 6.0
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GAME_SNAKE_VER', '1.2.0' );
+define( 'GAME_SNAKE_VER', '1.3.0' );
 
 /* 页面 slug 与标题（自动建页用） */
 define( 'GAME_SNAKE_PAGE_SLUG', 'game-snake' );
@@ -147,7 +147,8 @@ add_action( 'admin_notices', 'game_snake_admin_notice' );
  * ============================================================ */
 function game_snake_assets() {
 	wp_register_style( 'game-snake', plugins_url( 'assets/game.css', __FILE__ ), array(), GAME_SNAKE_VER );
-	wp_register_script( 'game-snake', plugins_url( 'assets/game.js', __FILE__ ), array(), GAME_SNAKE_VER, true );
+	wp_register_script( 'game-snake-sfx', plugins_url( 'assets/sfx.js', __FILE__ ), array(), GAME_SNAKE_VER, true );
+	wp_register_script( 'game-snake', plugins_url( 'assets/game.js', __FILE__ ), array( 'game-snake-sfx' ), GAME_SNAKE_VER, true );
 
 	wp_localize_script(
 		'game-snake',
@@ -185,6 +186,7 @@ function game_snake_shortcode( $atts ) {
 			</div>
 			<div class="gsnake-btns">
 				<button type="button" class="gsnake-iconbtn" id="gsnake-info" title="游戏介绍">❓</button>
+				<button type="button" class="gsnake-iconbtn" id="gsnake-sfx" title="音效开关" aria-label="音效开关">🔊</button>
 				<button type="button" class="gsnake-iconbtn" id="gsnake-fs" title="全屏">⛶</button>
 				<button type="button" class="gsnake-iconbtn" id="gsnake-quit" title="结束游戏" style="display:none;">⏹</button>
 			</div>

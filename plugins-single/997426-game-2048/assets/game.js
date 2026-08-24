@@ -86,6 +86,7 @@
     for (var i = 0; i < arr.length - 1; i++) {
       if (arr[i] === arr[i + 1]) {
         arr[i] *= 2; score += arr[i]; arr.splice(i + 1, 1);
+        if (window.GameSFX) window.GameSFX.play('eat', { pitch: 1 + Math.min(1, Math.log2(arr[i]) / 11) });
       }
     }
     while (arr.length < N) arr.push(0);
@@ -108,6 +109,7 @@
     });
     for (var j = 0; j < (4 - dirIdx) % 4; j++) b = rotate(b);
     if (moved) {
+      if (window.GameSFX) window.GameSFX.play('move');
       board = b; addRandom(); render();
       if (isDead()) end();
     }
@@ -125,6 +127,7 @@
   async function end() {
     running = false;
     quitBtn.style.display = 'none';
+    if (window.GameSFX) window.GameSFX.play('over');
     finalEl.textContent = score;
     resultEl.textContent = '上报中…';
     overOv.classList.remove('g2048-hidden');
@@ -151,6 +154,7 @@
     overOv.classList.add('g2048-hidden');
     quitBtn.style.display = '';
     running = true;
+    if (window.GameSFX) window.GameSFX.play('click');
   }
   $('g2048-go').addEventListener('click', start);
   $('g2048-retry').addEventListener('click', start);

@@ -20,7 +20,15 @@
   var scoreEl = $('gsnake-score'), bestEl = $('gsnake-best'), meEl = $('gsnake-me');
   var loginEl = $('gsnake-login'), finalEl = $('gsnake-final'), resultEl = $('gsnake-result');
   var lbEl = $('gsnake-lb');
-  var quitBtn = $('gsnake-quit'), fsBtn = $('gsnake-fs');
+  var quitBtn = $('gsnake-quit'), fsBtn = $('gsnake-fs'), sfxBtn = $('gsnake-sfx');
+
+  /* ── 音效 ── */
+  var SFX = window.GameSFX;
+  sfxBtn.addEventListener('click', function () {
+    var on = SFX ? SFX.toggle() : false;
+    sfxBtn.textContent = on ? '🔊' : '🔇';
+    if (on) SFX.play('click');
+  });
 
   var CFG = window.GameSnakeCfg || {};
   var cell, snake, dir, nextDir, food, score, best = 0, running = false, timer, speed;
@@ -90,6 +98,7 @@
       speed = Math.max(60, speed-3);
       clearInterval(timer); timer = setInterval(step, speed);
       hud();
+      if (window.GameSFX) window.GameSFX.play('eat', { pitch: 1 + Math.min(0.5, score/500) });
     } else snake.pop();
     draw();
   }
@@ -119,6 +128,7 @@
     overOv.classList.add('gsnake-hidden');
     quitBtn.style.display='';
     running=true; timer=setInterval(step,speed);
+    if (window.GameSFX) window.GameSFX.play('click');
   }
   $('gsnake-go').addEventListener('click',start);
   $('gsnake-retry').addEventListener('click',start);
@@ -128,6 +138,7 @@
     running=false; clearInterval(timer); timer=null;
     quitBtn.style.display='none';
     draw();
+    if (window.GameSFX) window.GameSFX.play('over');
     finalEl.textContent=score;
     resultEl.textContent='上报中…';
     overOv.classList.remove('gsnake-hidden');
