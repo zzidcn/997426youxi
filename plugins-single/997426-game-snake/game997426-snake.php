@@ -72,6 +72,7 @@ function game_snake_activate() {
 		}
 	} else {
 		update_option( 'game_snake_page_id', $existing->ID );
+		$page_id = $existing->ID;
 		// 页面若在回收站/草稿则恢复发布。
 		if ( 'publish' !== $existing->post_status ) {
 			wp_update_post(
@@ -83,15 +84,32 @@ function game_snake_activate() {
 		}
 	}
 
+	// 3) 向游戏大厅注册自己（大厅插件存在时自动出现在首页）。
+	if ( function_exists( 'game997426_hub_register' ) ) {
+		game997426_hub_register(
+			array(
+				'slug'   => GAME_SNAKE_PAGE_SLUG,
+				'title'  => GAME_SNAKE_PAGE_TITLE,
+				'url'    => get_permalink( $page_id ),
+				'icon'   => '🐍',
+				'desc'   => '经典贪吃蛇：吃果实变长变快。',
+				'plugin' => plugin_basename( __FILE__ ),
+			)
+		);
+	}
+
 	flush_rewrite_rules();
 }
 register_activation_hook( __FILE__, 'game_snake_activate' );
 
-/** 停用：把自动创建的页面移入回收站（不硬删，用户数据安全）。 */
+/** 停用：把自动创建的页面移入回收站（不硬删，用户数据安全），并从大厅注销。 */
 function game_snake_deactivate() {
 	$page_id = get_option( 'game_snake_page_id' );
 	if ( $page_id && 'page' === get_post_type( $page_id ) && 'trash' !== get_post_status( $page_id ) ) {
 		wp_trash_post( $page_id );
+	}
+	if ( function_exists( 'game997426_hub_unregister' ) ) {
+		game997426_hub_unregister( GAME_SNAKE_PAGE_SLUG );
 	}
 	flush_rewrite_rules();
 }
