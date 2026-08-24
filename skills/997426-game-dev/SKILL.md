@@ -11,7 +11,17 @@ metadata:
 
 # 997426小游戏 开发规范
 
-平台仓库：https://github.com/zzidcn/997426youxi
+## ⚠️ 架构变更（v2.0 起）：游戏即插件
+
+自 v2.0 起放弃 iframe 嵌入（Cookie/积分链路不可靠），**每款游戏 = 一个独立 WordPress 插件**：
+- 模板：`plugins-single/997426-game-snake/`（复制改造）
+- 游戏直接渲染在页面内，登录态天然可用（wp_localize_script 注入 nonce + userId）
+- 每游戏独立数据表 `wp_game997426_<slug>_scores`，独立 REST 命名空间 `game-<slug>/v1`
+- 认证用 WordPress 标准 X-WP-Nonce（`wp_create_nonce('wp_rest')`）
+- 上架 = 后台上传插件 zip → 页面写短代码 `[game_<slug>]`
+- 卸载插件自动 DROP 数据表
+
+## 平台仓库：https://github.com/zzidcn/997426youxi
 本地代码库：`D:\AIjob\997426-game-platform\`
 权威文档：`docs/游戏开发规范说明书.md`（先读它，本文是其执行摘要）
 
