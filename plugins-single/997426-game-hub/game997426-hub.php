@@ -2,7 +2,7 @@
 /**
  * Plugin Name: 997426 游戏大厅
  * Description: 自动收集所有已安装的 997426 系列游戏插件，生成游戏大厅页面与短代码。用法：[game_hub] 或访问 /games-hub/。
- * Version:     1.0.0
+ * Version:     1.1.0
  * Author:      997426
  * License:     GPL-2.0-or-later
  * Requires at least: 6.0
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GAME_HUB_VER', '1.0.0' );
+define( 'GAME_HUB_VER', '1.1.0' );
 define( 'GAME_HUB_PAGE_SLUG', 'games-hub' );
 define( 'GAME_HUB_PAGE_TITLE', '🎮 游戏大厅' );
 

@@ -1,34 +1,67 @@
-/* 997426 游戏大厅 */
+/* 997426 游戏大厅 —— 深色主题协调配色（适配 997426game 主题） */
 .ghub {
+  --ghub-bg: #1d2242;
+  --ghub-card: #232953;
+  --ghub-border: #2c3370;
+  --ghub-text: #e8eaf6;
+  --ghub-sub: #aab1d6;      /* 副文字：对比度 ≥ 7:1 */
   --ghub-accent: #7c5cff;
   --ghub-accent2: #00d4ff;
-  max-width: 900px; margin: 24px auto; padding: 20px;
+
+  max-width: 900px; margin: 24px auto; padding: 24px;
+  background: var(--ghub-bg);
+  border: 1px solid var(--ghub-border);
+  border-radius: 16px;
   font-family: system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 .ghub * { box-sizing: border-box; margin: 0; padding: 0; }
-.ghub-title { margin-bottom: 16px; }
-.ghub-empty { color: #888; background: #f6f7f9; padding: 18px; border-radius: 10px; text-align: center; }
 
+.ghub-title {
+  color: var(--ghub-text); margin-bottom: 18px; font-size: 1.35rem;
+}
+
+.ghub-empty {
+  color: var(--ghub-text); background: var(--ghub-card);
+  border: 1px dashed var(--ghub-border);
+  padding: 20px; border-radius: 10px; text-align: center;
+}
+
+/* 卡片网格 */
 .ghub-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px;
 }
 .ghub-card {
   display: flex; align-items: center; gap: 14px;
-  background: #fff; border: 1px solid #e2e5ee; border-radius: 14px;
-  padding: 16px; text-decoration: none; color: inherit;
-  transition: transform .15s ease, box-shadow .15s ease, border-color .15s;
+  background: var(--ghub-card);
+  border: 1px solid var(--ghub-border); border-radius: 14px;
+  padding: 16px; text-decoration: none !important; color: var(--ghub-text) !important;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
 }
 .ghub-card:hover {
-  transform: translateY(-3px); border-color: var(--ghub-accent);
-  box-shadow: 0 8px 24px rgba(124, 92, 255, .18); color: inherit;
+  transform: translateY(-3px); color: #fff !important;
+  border-color: var(--ghub-accent);
+  box-shadow: 0 8px 26px rgba(124, 92, 255, .28);
 }
 .ghub-icon {
   width: 56px; height: 56px; flex: none; border-radius: 14px;
-  background: linear-gradient(135deg, #171b35, #232953);
-  display: grid; place-items: center; font-size: 1.8rem;
+  background: linear-gradient(135deg, #171b35, #2f3670);
+  display: grid; place-items: center; font-size: 1.9rem;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
 }
-.ghub-name { font-weight: 800; font-size: 1rem; margin-bottom: 3px; }
-.ghub-desc { color: #777; font-size: .82rem; line-height: 1.4; }
 
-/* 深色主题自动适配（997426game 主题下） */
-.g99-main .ghub-card, body.has-header-image .ghub-card { }
+/* 文字：主标题高亮白，副文提高亮度确保可读 */
+.ghub-name { font-weight: 800; font-size: 1rem; margin-bottom: 4px; color: var(--ghub-text); letter-spacing: .02em; }
+.ghub-desc { color: var(--ghub-sub); font-size: .84rem; line-height: 1.5; }
+
+/* 浅色主题（默认 WP 主题）下的降级：通过 body 类粗判，浅色时反转配色。
+   997426game 主题 body 无浅色背景，此规则仅兜底。 */
+body:not(.g99-dark) .ghub {
+  --ghub-bg: #ffffff;
+  --ghub-card: #f4f5fa;
+  --ghub-border: #dfe3ef;
+  --ghub-text: #1c2033;
+  --ghub-sub: #555b78;
+}
+body:not(.g99-dark) .ghub-icon {
+  background: linear-gradient(135deg, #eceefe, #dfe2fb);
+}
