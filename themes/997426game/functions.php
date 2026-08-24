@@ -1,10 +1,20 @@
+<?php
+/**
+ * 997426 Game Platform
+ *
+ * @package theme997426
+ */
+
 /*
 Theme Name: 997426 Game Platform
-Theme URI: https://github.com/zzidcn/997426小游戏
+Theme URI: https://github.com/zzidcn/997426youxi
 Author: 997426
+Author URI: https://github.com/zzidcn
 Description: 997426小游戏平台主题 —— 响应式游戏门户，含游戏列表、分类、单页游戏播放器（自适应全屏）、排行榜与积分荣誉展示。配合 997426 游戏核心插件使用。
-Version: 1.0.0
-License: GPL-2.0+
+Version: 1.1.1
+Requires at least: 6.0
+Requires PHP: 7.4
+License: GPL-2.0-or-later
 Text Domain: game997426
 */
 
@@ -29,22 +39,24 @@ add_action( 'after_setup_theme', 'theme997426_setup' );
 function theme997426_assets() {
 	// REST API 预连接：游戏页 SDK 首次请求更快（性能规范 resource hints）。
 	$host = parse_url( home_url(), PHP_URL_HOST );
-	printf(
-		'<link rel="preconnect" href="%s" crossorigin>' . "\n",
-		esc_url( 'https://' . $host )
-	);
+	if ( $host ) {
+		printf(
+			'<link rel="preconnect" href="%s" crossorigin>' . "\n",
+			esc_url( 'https://' . $host )
+		);
+	}
 
 	wp_enqueue_style(
 		'theme997426',
 		get_stylesheet_directory_uri() . '/assets/css/main.css',
 		array(),
-		'1.0.0'
+		'1.1.1'
 	);
 	wp_enqueue_script(
 		'theme997426',
 		get_stylesheet_directory_uri() . '/assets/js/main.js',
 		array(),
-		'1.0.0',
+		'1.1.1',
 		true
 	);
 
