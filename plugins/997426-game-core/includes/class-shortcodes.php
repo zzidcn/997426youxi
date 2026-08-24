@@ -88,7 +88,7 @@ class GAME997426_Shortcodes {
 				<div class="g99-card-body">
 					<h3 class="g99-card-title"><?php the_title(); ?></h3>
 					<div class="g99-card-meta">
-						<span><?php echo esc_html( get_post_meta( get_the_ID(), '_game997426_plays', true ) ? (int) get_post_meta( get_the_ID(), '_game997426_plays', true ) . ' 次游玩' : '新游戏' ); ?></span>
+						<span><?php echo esc_html( get_post_meta( get_the_ID(), 'game997426_plays', true ) ? (int) get_post_meta( get_the_ID(), 'game997426_plays', true ) . ' 次游玩' : '新游戏' ); ?></span>
 					</div>
 				</div>
 			</a>

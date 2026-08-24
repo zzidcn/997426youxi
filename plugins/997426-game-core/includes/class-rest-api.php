@@ -128,8 +128,8 @@ class GAME997426_Rest_Api {
 		$result = GAME997426_Leaderboard::submit( $game_id, $score, $user_id, (string) $request->get_param( 'extra' ) );
 
 		// 游玩次数计数（post meta，后台可排序展示）。
-		$plays = (int) get_post_meta( $game_id, '_game997426_plays', true );
-		update_post_meta( $game_id, '_game997426_plays', $plays + 1 );
+		$plays = (int) get_post_meta( $game_id, 'game997426_plays', true );
+		update_post_meta( $game_id, 'game997426_plays', $plays + 1 );
 
 		// 积分规则：新纪录部分按 1% 转化为积分（至少 1 分）。
 		$points_awarded = 0;

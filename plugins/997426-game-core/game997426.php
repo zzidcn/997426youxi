@@ -26,6 +26,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-leaderboard.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-points.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-rest-api.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-shortcodes.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-meta-box.php';
 
 /**
  * 激活与升级时执行 schema 迁移（幂等）。

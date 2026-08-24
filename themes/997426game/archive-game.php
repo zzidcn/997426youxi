@@ -16,7 +16,7 @@ get_header();
 		if ( have_posts() ) :
 			while ( have_posts() ) :
 				the_post();
-				$plays = (int) get_post_meta( get_the_ID(), '_game997426_plays', true );
+				$plays = (int) get_post_meta( get_the_ID(), 'game997426_plays', true );
 				?>
 				<a class="g99-card" href="<?php the_permalink(); ?>">
 					<div class="g99-card-img">
